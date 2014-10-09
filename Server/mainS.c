@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
+#include "coreS.h"
 /* Main coté client */
 
 int main(){

@@ -54,7 +54,7 @@ SOCKET CreeSocketServeur(const char* port) {
   memset(&hints, 0, sizeof(struct addrinfo));
   hints.ai_family = AF_UNSPEC;    /* IPv4 ou IPv6 */
   hints.ai_socktype = SOCK_STREAM; /* socket flux connectée */
-  hints.ai_flags = AI_PASSIVE;    /* Les signifie que toutes les addresse de la machine seront utilisée */
+  hints.ai_flags = AI_PASSIVE;    /* Signifie que toutes les addresse de la machine seront utilisée */
   hints.ai_protocol = 0;          /* Any protocol */
 
   // on effectue la demande pour le port demandé
