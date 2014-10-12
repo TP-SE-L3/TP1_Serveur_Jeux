@@ -1,5 +1,7 @@
 #include <sys/types.h>
 #include <netdb.h>
+#include <stdarg.h>
+#include <errno.h>
 
 #include "coreS.h"
 
@@ -7,7 +9,7 @@ SOCKET sock_to_close = -1;
 char * program_name = "Test";
 
 SOCKET CreeSocketServeur(const char* port) {
-  
+	
 	SOCKET sock;
 	struct addrinfo hints; // structure pour faire la demande de port
 	struct addrinfo *listAddr, *address = NULL; // structure pour stocker et lire les résultats
@@ -107,4 +109,119 @@ void terminaison(int signal) {
   WSACleanup();
 #endif
 }
+
+
+
+int EnvoieMessage(SOCKET s, char* format, ...){
+  int i;
+  int res;
+
+  va_list listArgs;
+  va_start(listArgs, format);
+
+  // on calcul la taille du message
+  int taille = vsnprintf(NULL, 0, format, listArgs);
+  va_end(listArgs);
+
+  // un tableau un peu plus grand pour le \0
+  char chaine[taille+1];
+
+  va_start(listArgs, format);
+  vsnprintf(chaine, taille+1, format, listArgs);
+  va_end(listArgs);
+
+  i = 0;
+  while (i < taille) { // attention, il ne faut pas envoyer le \0
+    res = send(s, chaine+i, taille-i, MSG_NOSIGNAL);
+    if(res<=0){
+      fprintf(stderr, "error: write %s car %s\n", chaine, strerror(errno));
+      return -1;
+    }
+    i += res;
+  }
+
+  return i;
+}
+
+
+/* -------------------------------------------------
+				Avec formatage des données
+ -------------------------------------------------*/
+/*int sendMessage(SOCKET s, char* format, ...){
+	int i;
+	int res;
+
+	va_list listArgs;
+	va_start(listArgs, format); // format : le dernier paramètre nommé de la fonction
+	
+	// -------------- RAJOUTER LES TABLEAUX (pointeurs) -------------
+	for(i=0; format[i] != '\0'; i++){
+		switch(format[i]){
+			case 'c': // Caractère
+				printf("C : %c\n", va_arg(listArgs, int));
+			break;
+			case 'i': // Int
+				printf("I : %d\n", va_arg(listArgs, int));
+			break;
+			case 'f': // Float
+				printf("F : %f\n", va_arg(listArgs, double));
+			break;
+			case 'd': // Double
+				printf("D : %lf\n", va_arg(listArgs, double));
+			break;
+			case 's': // String
+				printf("S : %s\n", va_arg(listArgs, char*));
+			break;
+			default: break;
+		}
+	}
+	va_end(listArgs);
+
+	/*i = 0;
+	while (i < str->len) {
+		res = send(s, str->str+i, str->len-i, MSG_NOSIGNAL);
+		printf("str : %s\n", str->str);
+		if(res<=0){
+		  fprintf(stderr, "error: write %s car %s\n", str->str, strerror(errno));
+		  return -1;
+		}
+		i += res;
+	}
+
+	g_string_free(str, TRUE);
+	return 0;
+}
+*/
+
+
+
+/* -------------------------------------------------------
+				Avec glib (ne fonctionne pas)
+ ---------------------------------------------------------*/
+/*
+int sendMessage(SOCKET s, char* format, ...){
+  int i;
+  int res;
+
+  va_list listArgs;
+  va_start(listArgs, format); // format : le dernier paramètre nommé de la fonction
+  GString *str = g_string_new("");
+  g_string_vprintf(str, format, listArgs);
+
+  va_end(listArgs);
+
+  i = 0;
+  while (i < str->len) {
+    res = send(s, str->str+i, str->len-i, MSG_NOSIGNAL);
+    printf("str : %s\n", str->str);
+    if(res<=0){
+      fprintf(stderr, "error: write %s car %s\n", str->str, strerror(errno));
+      return -1;
+    }
+    i += res;
+  }
+
+  g_string_free(str, TRUE);
+  return 0;
+}*/
   

@@ -5,32 +5,15 @@
 
 /* Main coté client */
 
+
 int main(){
-		char* choice = "";
-		int continu = 1;
+		const char* server_name = "0.0.0.0";
+		const char* port = "1025";
+		int res;
+		SOCKET sock;
 		
-		while(continu == 1){
-			system("clear");
-			printf("======== MENU PRINCIPAL =========");
-			printf("A quel jeux voulez-vous jouer ?\n");
-			printf(" 1. Pendu\n");
-			printf(" 2. Morpion\n");
-			printf(" 3. Bataille Naval\n");
-			printf(" 4. Quitter");
-			scanf("%s", choice);
-			switch(choice[0]){
-					case '1':
-						printf("pendu");
-					break;
-					case '2':
-						printf(" 2. Morpion\n");
-					break;
-					case '3':
-						printf(" 2. Bataill\n");
-					break;
-					case '4':
-						continu = 0;
-					break;
-			}
-		}
+		sock = CreeConnectSocketClient(server_name, port);
+		//printf("Socket : %d\n", res);
+			
+		return 0;
 }

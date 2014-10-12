@@ -4,6 +4,7 @@
 #include "coreC.h"
 
 SOCKET sock_to_close = -1;
+SOCKET sock_to_declare = -1;
 char * program_name = "Test";
 
 SOCKET CreeConnectSocketClient(const char *nom_serveur, const char* port) {
@@ -18,7 +19,7 @@ SOCKET CreeConnectSocketClient(const char *nom_serveur, const char* port) {
   // Des variable pour contenir de adresse de machine et des numero de port afin de les afficher
   char hname[NI_MAXHOST], sname[NI_MAXSERV];
   // la socket utilisée
-  SOCKET s=-1;
+  SOCKET sock=-1;
 
   // on rempli la structure hints de demande d'adresse
   memset(&hints, 0, sizeof(struct addrinfo));
@@ -53,16 +54,16 @@ SOCKET CreeConnectSocketClient(const char *nom_serveur, const char* port) {
 	    hname, sname);
     
     // on essaye
-    s = socket(rp->ai_family, rp->ai_socktype,rp->ai_protocol);
+    sock = socket(rp->ai_family, rp->ai_socktype,rp->ai_protocol);
     // si le résultat est -1 cela n'a pas fonctionné on recommence avec la prochaine
-    if (s == -1) {
+    if (sock == -1) {
       perror("Création de la socket");
       rp = rp->ai_next;
       continue;
     }    
    
     // si la socket a été obtenue, on essaye de se connecter
-    res = connect(s, rp->ai_addr, rp->ai_addrlen);
+    res = connect(sock, rp->ai_addr, rp->ai_addrlen);
     if (res == 0 ) {// cela a fonctionné on est connecté
       bon = 1;
       fprintf (stderr, "OK\n");
@@ -70,7 +71,7 @@ SOCKET CreeConnectSocketClient(const char *nom_serveur, const char* port) {
     }
     else { // sinon le bind a été impossible, il faut fermer la socket
       perror("Imposible de se connecter");
-      close (s);
+      close (sock);
     }
 
     rp = rp->ai_next;
@@ -82,9 +83,9 @@ SOCKET CreeConnectSocketClient(const char *nom_serveur, const char* port) {
   }
   freeaddrinfo(result);           /* No longer needed */  
 
-  sock_a_fermer = s;
+  sock_to_close = sock;
 
-  return s;
+  return sock;
 }
 
 
@@ -99,9 +100,5 @@ void terminaison(int signal) {
     close(sock_to_close);
   }
 
-#if defined (WIN32)
-  // Ceci est du code spécifique à windows
-  WSACleanup();
-#endif
 }
   

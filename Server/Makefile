@@ -7,6 +7,7 @@ mainS.o : mainS.c coreS.h
 	gcc -Wall -c mainS.c
 
 coreS.o : coreS.c coreS.h
+	#gcc `pkg-config --cflags --libs glib-2.0` coreS.c
 	gcc -Wall -c coreS.c
 
 clean:

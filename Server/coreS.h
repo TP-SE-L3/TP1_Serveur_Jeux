@@ -24,8 +24,6 @@ typedef struct in_addr IN_ADDR;
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
 
-#define TRUE 1
-#define FALSE 0
 
 #ifndef NI_MAXHOST
 #define NI_MAXHOST
@@ -37,6 +35,7 @@ extern char * program_name;
 void terminaison(int signal);
 
 SOCKET CreeSocketServeur(const char* port);
+int sendMessage(SOCKET s, char* format, ...);
 
 int EnvoieFichier(SOCKET s, int fd);
 int RecoitFichier(int fd, SOCKET s);

@@ -33,10 +33,11 @@ typedef struct in_addr IN_ADDR;
 
 
 extern SOCKET sock_to_close;
+extern SOCKET sock_to_declare;
 extern char * program_name;
 void terminaison(int signal);
 
-SOCKET CreeSocketServeur(const char* port);
+SOCKET CreeConnectSocketClient(const char *nom_serveur, const char* port);
 
 int EnvoieFichier(SOCKET s, int fd);
 int RecoitFichier(int fd, SOCKET s);
