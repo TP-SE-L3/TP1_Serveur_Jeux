@@ -56,33 +56,33 @@ int main(){
 			exit(EXIT_FAILURE);
 		}
 		
-		
-		sockCli = accept(sockServ, (struct sockaddr*)&addrServ, &lenAddrServ);
-		if(sockCli == - 1){
-				perror("Error Accept");
-		}
-		printf("-> Nouveau client sur le socket : %d", (int)sockCli);
-		
-		
-		if(recv(sockCli, message, sizeof(message), 0) == -1){
-			perror("Error recv");
-			exit(EXIT_FAILURE);
-		}
-		
-		printf("Msg : %s\n", message);
+		while(1){
+			sockCli = accept(sockServ, (struct sockaddr*)&addrServ, &lenAddrServ);
+			if(sockCli == - 1){
+					perror("Error Accept");
+			}
+			printf("-> Nouveau client sur le socket : %d", (int)sockCli);
+			
+			
+			if(recv(sockCli, message, sizeof(message), 0) == -1){
+				perror("Error recv");
+				exit(EXIT_FAILURE);
+			}
+			
+			printf("Msg : %s\n", message);
 
 
-		sendMessage(sockCli, "%d %d", 2, 10);
-		//sendMessage(sockCli, format, "Mon messages est le suivant...\0");
-		
-		
-		
-		if(shutdown(sockCli, SHUT_RDWR) == -1){
-			perror("Error to shutdown sockets");
-			exit(EXIT_FAILURE);
+			sendMessage(sockCli, "%d %d", 2, 10);
+			//sendMessage(sockCli, format, "Mon messages est le suivant...\0");
+			
+			
+			
+			if(shutdown(sockCli, SHUT_RDWR) == -1){
+				perror("Error to shutdown sockets");
+				exit(EXIT_FAILURE);
+			}
+			close(sockCli);
 		}
-		close(sockCli);
-		
 		
 		/*char choice[50] = "";
 		int continu = 1;*/

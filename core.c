@@ -4,6 +4,7 @@
 #include <stdarg.h>
 
 #include "core.h"
+#include "utils.h"
 
 
 int sendMessage(SOCKET s, char* format, ...){
@@ -39,10 +40,21 @@ int sendMessage(SOCKET s, char* format, ...){
 
 int recvHeader(SOCKET sock, header_t* header){
 	char message[SIZE_HEADER];
+	int res;
+	/**
+	 * Améliorer la fonction de reception
+	 * */
 	if(recv(sock, message, sizeof(message), 0) == -1){
 		perror("Error recv");
 		return -1;
 	}
 	printf("%s\n", message);
+	res = stroc("Bonjour", "");
+	printf("Res : %d", res);
 	return 0;
+}
+
+int sendHaeder(SOCKET sock, header_t header){
+	char message[SIZE_HEADER];
+	
 }

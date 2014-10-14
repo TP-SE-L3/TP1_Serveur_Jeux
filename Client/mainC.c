@@ -14,7 +14,7 @@ int main(){
 		struct sockaddr_in sin = {0};
 		int sockOptions = 1;
 		char* format = "-> MSG : %s \n-> Id : %d";
-		header_t* header;
+		header_t header;
 		
 		
 		sock = socket(AF_INET, SOCK_STREAM, 0);
