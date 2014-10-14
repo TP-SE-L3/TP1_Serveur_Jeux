@@ -45,4 +45,6 @@ struct header_t{
 SOCKET CreeConnectSocketClient(const char *nom_serveur, const char* port);
 
 int sendMessage(SOCKET s, char* format, ...);
+
 int recvHeader(SOCKET sock, struct header_t* header);
+int sendHeader(SOCKET sock, header_t header);

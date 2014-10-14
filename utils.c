@@ -14,3 +14,20 @@ int stroc(char* str1, char* str2){
 	}
 	return -1;
 }
+
+char* strbtw(char* str, char start, char end){
+	int i, j, k;
+	char* nwStr;
+	for(i=0; *(str+i) != '\0' && *(str+i) != start; i++);
+	if(*(str+i) != '\0'){
+		i++; // On va plus loin que start
+		for(j=i; *(str+j) != '\0' && *(str+j) != end; j++);
+		nwStr = malloc((j-i) * sizeof(char)+1);
+		for(k=i; k < j; k++){// On ne prend pas le caractère end (position j)
+			*(nwStr+(k-i)) = *(str+k);
+		}
+		*(nwStr+k) = '\0';
+		return nwStr;
+	}
+	return NULL;
+}

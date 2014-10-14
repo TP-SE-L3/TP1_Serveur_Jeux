@@ -19,7 +19,7 @@ int main(){
 		socklen_t lenAddrServ = sizeof(addrServ);
 		int sockOptions = 1;
 		char message[256];
-		
+		header_t header = {1, 10};
 		/*fd_set readfs;
 		FD_ZERO(&readfs);
 		struct timeval timeout;
@@ -70,9 +70,9 @@ int main(){
 			}
 			
 			printf("Msg : %s\n", message);
+			
 
-
-			sendMessage(sockCli, "%d %d", 2, 10);
+			sendHeader(sockCli, header);
 			//sendMessage(sockCli, format, "Mon messages est le suivant...\0");
 			
 			

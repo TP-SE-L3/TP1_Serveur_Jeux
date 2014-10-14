@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 
+
 #include "../core.h"
 
 /* Main coté Client */
@@ -45,15 +46,9 @@ int main(){
 		
 		sendMessage(sock, format, "Bonjour je suis un client", 10);
 		
-		if(recvHeader(sock, &header) == -1){
-			perror("Faux");
-			exit(-1);
-		}
-		else{
-			printf("Salute");
-		}
+		recvHeader(sock, &header);
 		
-		
+	
 		
 		if(shutdown(sock, SHUT_RDWR) == -1){
 			perror("Error to shutdown sockets");

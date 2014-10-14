@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <string.h>
 
 #include "core.h"
 #include "utils.h"
@@ -40,6 +41,7 @@ int sendMessage(SOCKET s, char* format, ...){
 
 int recvHeader(SOCKET sock, header_t* header){
 	char message[SIZE_HEADER];
+	char* contain;
 	int res;
 	/**
 	 * Améliorer la fonction de reception
@@ -48,13 +50,16 @@ int recvHeader(SOCKET sock, header_t* header){
 		perror("Error recv");
 		return -1;
 	}
-	printf("%s\n", message);
+	printf("%s --- s:%d\n", message, strlen(message));
 	res = stroc("Bonjour", "");
+	contain = strbtw(message, '[', ']');
+	printf("Contain : %s\n", contain);
+	free(contain);
 	printf("Res : %d", res);
 	return 0;
 }
 
-int sendHaeder(SOCKET sock, header_t header){
-	char message[SIZE_HEADER];
-	
+int sendHeader(SOCKET sock, header_t header){
+	char message[SIZE_HEADER] = "[ID:%d SIZE:%d]";
+	return sendMessage(sock, message, header.id, header.size);
 }
