@@ -1,13 +1,13 @@
 all: Client
 
-Client: mainC.o coreC.o
-	gcc -Wall -o Client coreC.o mainC.o
+Client: mainC.o core.o
+	gcc -Wall -o Server core.o mainC.o
 
-mainC.o : mainC.c coreC.h
+mainC.o : mainC.c ../core.h
 	gcc -Wall -c mainC.c
 
-coreC.o : coreC.c coreC.h
-	gcc -Wall -c coreC.c
+core.o : ../core.c ../core.h
+	gcc -Wall -c ../core.c
 
 clean:
 	rm *.o

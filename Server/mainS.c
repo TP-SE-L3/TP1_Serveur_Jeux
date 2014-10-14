@@ -11,10 +11,9 @@
 #define PORT 2000
 
 
-#include "coreS.h"
+#include "../core.h"
 
 /* Main coté Serveur */
-
 
 int main(){
 		int res = 0;
@@ -23,6 +22,7 @@ int main(){
 		char* format = "Msg : %s";
 		socklen_t lenAddrServ = sizeof(addrServ);
 		int sockOptions = 1;
+		char message[256];
 		
 		/*fd_set readfs;
 		FD_ZERO(&readfs);
@@ -67,14 +67,12 @@ int main(){
 		}
 		printf("-> Nouveau client sur le socket : %d", (int)sockCli);
 		
-		/*if(recv(sockCli, message, sizeof(message), 0) == -1){
+		if(recv(sockCli, message, sizeof(message), 0) == -1){
 			perror("Error recv");
 			exit(EXIT_FAILURE);
-		}*/
-		
-		
-		receptData((int)STDOUT_FILENO, sockCli);
-		
+		}
+		printf("Msg : %s\n", message);
+
 		sendMessage(sockCli, format, "Mon messages est le suivant...\0");
 		
 		

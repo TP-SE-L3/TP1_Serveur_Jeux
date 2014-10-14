@@ -1,14 +1,14 @@
 all: Server
 
-Server: mainS.o coreS.o
-	gcc -Wall -o Server coreS.o mainS.o
+Server: mainS.o core.o
+	gcc -Wall -o Server core.o mainS.o
 
-mainS.o : mainS.c coreS.h
+mainS.o : mainS.c ../core.h
 	gcc -Wall -c mainS.c
 
-coreS.o : coreS.c coreS.h
+core.o : ../core.c ../core.h
 	#gcc `pkg-config --cflags --libs glib-2.0` coreS.c
-	gcc -Wall -c coreS.c
+	gcc -Wall -c ../core.c
 
 clean:
 	rm *.o

@@ -3,7 +3,7 @@
 #include <errno.h>
 #include <stdarg.h>
 
-#include "coreS.h"
+#include "core.h"
 
 
 int sendMessage(SOCKET s, char* format, ...){
