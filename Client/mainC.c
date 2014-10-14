@@ -14,7 +14,6 @@ int main(){
 		struct sockaddr_in sin = {0};
 		int sockOptions = 1;
 		char* format = "-> MSG : %s \n-> Id : %d";
-		char message[256];
 		header_t* header;
 		
 		
@@ -43,14 +42,17 @@ int main(){
 		printf("Connexion serveur OK\n");
 		
 		
+		
 		sendMessage(sock, format, "Bonjour je suis un client", 10);
 		
-		if(recv(sock, message, sizeof(message), 0) == -1){
-			perror("Error recv");
-			exit(EXIT_FAILURE);
+		if(recvHeader(sock, &header) == -1){
+			perror("Faux");
+			exit(-1);
+		}
+		else{
+			printf("Salute");
 		}
 		
-		printf("Msg : %s", messages);
 		
 		
 		if(shutdown(sock, SHUT_RDWR) == -1){

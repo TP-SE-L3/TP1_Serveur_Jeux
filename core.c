@@ -36,3 +36,13 @@ int sendMessage(SOCKET s, char* format, ...){
 
   return i;
 }
+
+int recvHeader(SOCKET sock, header_t* header){
+	char message[SIZE_HEADER];
+	if(recv(sock, message, sizeof(message), 0) == -1){
+		perror("Error recv");
+		return -1;
+	}
+	printf("%s\n", message);
+	return 0;
+}

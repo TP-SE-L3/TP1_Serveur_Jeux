@@ -8,18 +8,14 @@
 #include <errno.h>
 #include <stdarg.h>
 
-#define PORT 2000
-
 
 #include "../core.h"
 
 /* Main coté Serveur */
 
 int main(){
-		int res = 0;
 		SOCKET sockServ, sockCli;
 		struct sockaddr_in addrServ;
-		char* format = "Msg : %s";
 		socklen_t lenAddrServ = sizeof(addrServ);
 		int sockOptions = 1;
 		char message[256];
@@ -67,14 +63,17 @@ int main(){
 		}
 		printf("-> Nouveau client sur le socket : %d", (int)sockCli);
 		
+		
 		if(recv(sockCli, message, sizeof(message), 0) == -1){
 			perror("Error recv");
 			exit(EXIT_FAILURE);
 		}
+		
 		printf("Msg : %s\n", message);
 
-		sendMessage(sockCli, format, "Mon messages est le suivant...\0");
-		
+
+		sendMessage(sockCli, "%d %d", 2, 10);
+		//sendMessage(sockCli, format, "Mon messages est le suivant...\0");
 		
 		
 		

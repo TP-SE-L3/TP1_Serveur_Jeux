@@ -23,9 +23,8 @@ typedef struct in_addr IN_ADDR;
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
-#define SIZE_BUFF 50
 #define PORT 2000
-
+#define SIZE_HEADER 10
 
 #define TRUE 1
 #define FALSE 0
@@ -33,6 +32,8 @@ typedef struct in_addr IN_ADDR;
 #ifndef NI_MAXHOST
 #define NI_MAXHOST
 #endif
+
+
 
 typedef struct header_t header_t;
 struct header_t{
@@ -44,3 +45,4 @@ struct header_t{
 SOCKET CreeConnectSocketClient(const char *nom_serveur, const char* port);
 
 int sendMessage(SOCKET s, char* format, ...);
+int recvHeader(SOCKET sock, struct header_t* header);
