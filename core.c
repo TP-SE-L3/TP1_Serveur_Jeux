@@ -42,7 +42,7 @@ int sendMessage(SOCKET s, char* format, ...){
 int recvHeader(SOCKET sock, header_t* header){
 	char message[SIZE_HEADER];
 	char* contain;
-	int res;
+	char* resPlace; // Pour déterminer la place d'un mot que l'on cherche
 	/**
 	 * Améliorer la fonction de reception
 	 * */
@@ -51,11 +51,16 @@ int recvHeader(SOCKET sock, header_t* header){
 		return -1;
 	}
 	printf("%s --- s:%d\n", message, strlen(message));
-	res = stroc("Bonjour", "");
 	contain = strbtw(message, '[', ']');
-	printf("Contain : %s\n", contain);
+	resPlace = strstr(contain, "ID:");
+	if(resPlace != NULL){
+		printf("id : %s\n", strpbrk(resPlace+3, " \0"));
+	}
+	resPlace = strstr(contain, "SIZE:");
+	if(resPlace != NULL){
+			printf("size : %s\n", (resPlace+5));
+	}
 	free(contain);
-	printf("Res : %d", res);
 	return 0;
 }
 

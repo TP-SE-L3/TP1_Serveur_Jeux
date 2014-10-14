@@ -22,12 +22,24 @@ char* strbtw(char* str, char start, char end){
 	if(*(str+i) != '\0'){
 		i++; // On va plus loin que start
 		for(j=i; *(str+j) != '\0' && *(str+j) != end; j++);
-		nwStr = malloc((j-i) * sizeof(char)+1);
+		nwStr = malloc((j-i+1) * sizeof(char));
 		for(k=i; k < j; k++){// On ne prend pas le caractère end (position j)
 			*(nwStr+(k-i)) = *(str+k);
 		}
 		*(nwStr+k) = '\0';
 		return nwStr;
+	}
+	return NULL;
+}
+
+char* substr(char* start, char* end){
+	int i=0;
+	char* nwStr;
+	for(i=0; *(start+i) != *end && *(start+i) != '\0'; i++);
+	if(i > 0){
+		i = (*(start+i) == '\0')? i-1: i;	
+		nwStr = malloc((i+1)*sizeof(char)); //------------ Penser à un realloc start, la taile est obligatoirement plus petite ou égale !!!!
+		return nwStr; 						// Tester la nouvelle valeur mémoire de réalloc
 	}
 	return NULL;
 }

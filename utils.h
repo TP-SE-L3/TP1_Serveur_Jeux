@@ -13,6 +13,13 @@ int stroc(char* str1, char* str2);
 	@param start: caractère de début
 	@param end: caractère de fin(\0 si on veut toute la fin de chaine)
 */
-char* strbtw(char* str, char start, char end); 
+char* strbtw(char* str, char start, char end);
+
+/* Retourne une chaine entre le pointeur de départ et le pointeur de fin
+   !!! Il faut free la chaine de retour !!!
+   @param start: pointeur de début de chaine
+   @param end: pointeur de fin de chaine; 
+*/
+char* substr(char* start, char* end);
 
 #endif
