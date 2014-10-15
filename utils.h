@@ -15,11 +15,11 @@ int stroc(char* str1, char* str2);
 */
 char* strbtw(char* str, char start, char end);
 
-/* Retourne une chaine entre le pointeur de départ et le pointeur de fin
-   !!! Il faut free la chaine de retour !!!
-   @param start: pointeur de début de chaine
-   @param end: pointeur de fin de chaine; 
+/* Coupe la chaine str dès que un caractère de "end" est trouvé(renplcoupe : \0)
+   Renvoie un pointeur sur le caractère après le "end" trouvé, s'il n'y en a pas ou que end n'est pas trouvé, elle renvoie NULL
+   @param str: pointeur de début de chaine
+   @param end: chaine de caractèe contenant les caractère de fin
 */
-char* substr(char* start, char* end);
+char* substrpbrk(char* str, char* end);
 
 #endif

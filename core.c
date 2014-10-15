@@ -43,6 +43,7 @@ int recvHeader(SOCKET sock, header_t* header){
 	char message[SIZE_HEADER];
 	char* contain;
 	char* resPlace; // Pour déterminer la place d'un mot que l'on cherche
+	char* idStr;
 	/**
 	 * Améliorer la fonction de reception
 	 * */
@@ -51,12 +52,16 @@ int recvHeader(SOCKET sock, header_t* header){
 		return -1;
 	}
 	printf("%s --- s:%d\n", message, strlen(message));
+	// Revoir le nom des variables
 	contain = strbtw(message, '[', ']');
 	resPlace = strstr(contain, "ID:");
 	if(resPlace != NULL){
-		printf("id : %s\n", strpbrk(resPlace+3, " \0"));
+		idStr = resPlace+3;
+		resPlace = substrpbrk(resPlace+3, " \0");
+		header->id = atoi(idStr); // Peut utiliser strtol, avec gestion d'erreur
+		printf("Header Id : %d\n", header->id);
 	}
-	resPlace = strstr(contain, "SIZE:");
+	resPlace = strstr(resPlace, "SIZE:");
 	if(resPlace != NULL){
 			printf("size : %s\n", (resPlace+5));
 	}

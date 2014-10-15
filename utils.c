@@ -32,14 +32,12 @@ char* strbtw(char* str, char start, char end){
 	return NULL;
 }
 
-char* substr(char* start, char* end){
+char* substrpbrk(char* str, char* end){
 	int i=0;
-	char* nwStr;
-	for(i=0; *(start+i) != *end && *(start+i) != '\0'; i++);
-	if(i > 0){
-		i = (*(start+i) == '\0')? i-1: i;	
-		nwStr = malloc((i+1)*sizeof(char)); //------------ Penser à un realloc start, la taile est obligatoirement plus petite ou égale !!!!
-		return nwStr; 						// Tester la nouvelle valeur mémoire de réalloc
+	for(i=0; *(str+i) != *end && *(str+i) != '\0'; i++);
+	if(*(str+i) == '\0'){
+		return NULL;
 	}
-	return NULL;
+	*(str+i) = '\0';
+	return (str+i+1);
 }
