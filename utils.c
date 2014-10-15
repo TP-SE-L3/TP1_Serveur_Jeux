@@ -32,7 +32,7 @@ char* strbtw(char* str, char start, char end){
 	return NULL;
 }
 
-char* substrpbrk(char* str, char* end){
+char* substrpbrk(char* str, char* end)
 	int i=0;
 	for(i=0; *(str+i) != *end && *(str+i) != '\0'; i++);
 	if(*(str+i) == '\0'){

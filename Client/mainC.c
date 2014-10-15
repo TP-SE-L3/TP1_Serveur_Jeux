@@ -51,7 +51,7 @@ int main(){
 				exit(EXIT_FAILURE);
 		}
 		
-		recvMsg(sock, &header);
+		recvMessage(sock, &header);
 		
 		if(shutdown(sock, SHUT_RDWR) == -1){
 			perror("Error to shutdown sockets");

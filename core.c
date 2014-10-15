@@ -73,6 +73,20 @@ int recvHeader(SOCKET sock, header_t* header){
 	return 0;
 }
 
+int recvMessage(SOCKET sock, header_t header){
+	char* message = malloc(header.size * sizeof(char));
+	if(recv(sock, header.size, sizeof(message), 0) == -1){
+		perror("Error recv");
+		return -1;
+	}
+	
+	printf("Message %s\n", message);
+	
+	free(message);
+	return 0;
+}
+
+
 int sendHeader(SOCKET sock, header_t header){
 	char message[SIZE_HEADER] = "[ID:%d SIZE:%d]";
 	return sendMessage(sock, message, header.id, header.size);
