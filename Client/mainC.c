@@ -46,9 +46,12 @@ int main(){
 		
 		sendMessage(sock, format, "Bonjour je suis un client", 10);
 		
-		recvHeader(sock, &header);
+		if(recvHeader(sock, &header) == -1){
+				perror("Error recv header");
+				exit(EXIT_FAILURE);
+		}
 		
-	
+		recvMsg(sock, &header);
 		
 		if(shutdown(sock, SHUT_RDWR) == -1){
 			perror("Error to shutdown sockets");

@@ -41,11 +41,11 @@ int sendMessage(SOCKET s, char* format, ...){
 
 int recvHeader(SOCKET sock, header_t* header){
 	char message[SIZE_HEADER];
-	char* contain;
-	char* resPlace; // Pour déterminer la place d'un mot que l'on cherche
-	char* idStr;
+	char* strCurrent; // Chaine qui va être modifée, petit à petit pour récupérer les bon éléments
+	char* idStr, *sizeStr;
+	char* resStr; // Tmp variable de résultat
 	/**
-	 * Améliorer la fonction de reception
+	 * Améliorer la fonction de reception ----------------------- TODO
 	 * */
 	if(recv(sock, message, sizeof(message), 0) == -1){
 		perror("Error recv");
@@ -53,19 +53,23 @@ int recvHeader(SOCKET sock, header_t* header){
 	}
 	printf("%s --- s:%d\n", message, strlen(message));
 	// Revoir le nom des variables
-	contain = strbtw(message, '[', ']');
-	resPlace = strstr(contain, "ID:");
-	if(resPlace != NULL){
-		idStr = resPlace+3;
-		resPlace = substrpbrk(resPlace+3, " \0");
+	// Les paramètres doivent être dans le bon ordre (1:ID, 2:SIZE)
+	strCurrent = strbtw(message, '[', ']');
+	resStr = strstr(strCurrent, "ID:");
+	if(resStr != NULL){
+		strCurrent = resStr;
+		idStr = strCurrent+strlen("ID:");
+		strCurrent = substrpbrk(idStr, " \0");
 		header->id = atoi(idStr); // Peut utiliser strtol, avec gestion d'erreur
-		printf("Header Id : %d\n", header->id);
 	}
-	resPlace = strstr(resPlace, "SIZE:");
-	if(resPlace != NULL){
-			printf("size : %s\n", (resPlace+5));
+	resStr = strstr(strCurrent, "SIZE:");
+	if(strCurrent != NULL){
+		strCurrent = resStr;
+		sizeStr = strCurrent+strlen("SIZE:");
+		strCurrent = substrpbrk(sizeStr, " \0");
+		header->size = atoi(sizeStr);
 	}
-	free(contain);
+	free(strCurrent);
 	return 0;
 }
 
