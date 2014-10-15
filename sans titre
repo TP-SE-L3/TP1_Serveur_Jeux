@@ -10,6 +10,7 @@ git config --global user.email "email_github"
 //Aller dans le répertoire voulu
 git init
 git remote add <chemin répertoire git>
+// Ou git clone <chemin répertoire>
 
 // Etape 3 : Pull
 git pull origin master

@@ -15,7 +15,7 @@ int stroc(char* str1, char* str2);
 */
 char* strbtw(char* str, char start, char end);
 
-/* Coupe la chaine str dès que un caractère de "end" est trouvé(renplcoupe : \0)
+/* Coupe la chaine str dès que un caractère de "end" est trouvé(renplace par : \0)
    Renvoie un pointeur sur le caractère après le "end" trouvé, s'il n'y en a pas ou que end n'est pas trouvé, elle renvoie NULL
    @param str: pointeur de début de chaine
    @param end: chaine de caractèe contenant les caractère de fin
