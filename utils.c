@@ -33,11 +33,14 @@ char* strbtw(char* str, char start, char end){
 }
 
 char* substrpbrk(char* str, char* end){
-	int i=0;
-	for(i=0; *(str+i) != *end && *(str+i) != '\0'; i++);
-	if(*(str+i) == '\0'){
-		return NULL;
+	int i, j;
+	for(i=0; *(str+i) != '\0'; i++){
+		for(j=0; *(end+j) != '\0'; j++){
+			if(*(str+i) == *(end+j)){
+				*(str+i) = '\0';
+				return str+i+1;
+			}
+		}
 	}
-	*(str+i) = '\0';
-	return (str+i+1);
+	return NULL;
 }

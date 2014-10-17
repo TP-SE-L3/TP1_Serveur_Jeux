@@ -6,6 +6,7 @@
 
 #include "core.h"
 #include "utils.h"
+#include "parser.h"
 
 
 int sendMessage(SOCKET s, char* format, ...){
@@ -51,7 +52,7 @@ int recvHeader(SOCKET sock, header_t* header){
 		perror("Error recv");
 		return -1;
 	}
-	printf("%s --- s:%d\n", message, strlen(message));
+	printf("%s-->s:%d\n", message, strlen(message));
 	// Revoir le nom des variables
 	// Les paramètres doivent être dans le bon ordre (1:ID, 2:SIZE)
 	strCurrent = strbtw(message, '[', ']');
@@ -75,12 +76,15 @@ int recvHeader(SOCKET sock, header_t* header){
 
 int recvMessage(SOCKET sock, header_t header){
 	char* message = malloc(header.size * sizeof(char));
+	command_t commande;
 	if(recv(sock, message, header.size, 0) == -1){
 		perror("Error recv");
 		return -1;
 	}
-	
 	printf("Message %s\n", message);
+	commande = getCommand(message);
+	printf("Commande: %s\n", commande.name);
+	//printf("Commande: %s\n", commande.strArgs);
 	
 	free(message);
 	return 0;
@@ -88,6 +92,11 @@ int recvMessage(SOCKET sock, header_t header){
 
 
 int sendHeader(SOCKET sock, header_t header){
-	char message[SIZE_HEADER] = "[ID:%d SIZE:%d]";
-	return sendMessage(sock, message, header.id, header.size);
+	char message[SIZE_HEADER];
+	int i;
+	sprintf(message, "[ID:%d SIZE:%d]", header.id, header.size);
+	for(i=strlen(message); i < SIZE_HEADER; i++){
+		message[i] = ' '; // On remplit la fin de chaine avec des espaces
+	}
+	return sendMessage(sock, "%s", message); // Ici la va_list ne sert à rien
 }

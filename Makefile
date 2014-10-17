@@ -14,7 +14,6 @@ $(EXEC1):
 $(EXEC2):
 	@(cd $@; make)
 
-
 clean:
 	@(cd $(EXEC1) && make $@)
 	@(cd $(EXEC2) && make $@)

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -19,7 +20,7 @@ int main(){
 		socklen_t lenAddrServ = sizeof(addrServ);
 		int sockOptions = 1;
 		char message[256];
-		char* msgToSend;
+		char* msgToSend = "cmd:out [    10  \"Salute\"];";
 		header_t header = {1, 10};
 		/*fd_set readfs;
 		FD_ZERO(&readfs);
@@ -70,10 +71,9 @@ int main(){
 				exit(EXIT_FAILURE);
 			}
 			printf("Msg : %s\n", message);
-			
-			
+			header.size = strlen(msgToSend)+1;
 			sendHeader(sockCli, header);
-			//sendMessage(sockCli, format, "Mon messages est le suivant...\0");
+			sendMessage(sockCli, "%s", msgToSend);
 			
 			
 			
