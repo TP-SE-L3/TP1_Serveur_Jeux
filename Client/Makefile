@@ -1,19 +1,34 @@
-all: Client
+CC = gcc
+CFLAGS = -W -Wall
+EXEC = Client
+SRC = $(wildcard *.c ../*.c)
+INCLUDES = $(wildcard *.h ../*.h)
+OBJ = $(SRC:.c=.o)
 
-Client: mainC.o core.o utils.o parser.o
-	gcc -Wall -o Client core.o utils.o parser.o mainC.o
+all: $(EXEC)
+
+$(EXEC): $(OBJ)
+	$(CC) $(CFLAGS) -o $(EXEC) $(OBJ)
 
 mainC.o : mainC.c ../core.h
-	gcc -Wall -c mainC.c
+	$(CC) $(CFLAGS) -c $^
 
-core.o : ../core.c ../core.h
-	gcc -Wall -c ../core.c
+%.o: ../%.c ../%.h
+	$(CC) $(CFLAGS) -c $^
 
-utils.o : ../utils.c ../utils.h
-	gcc -Wall -c ../utils.c
 
-parser.o: ../parser.c ../parser.h
-	gcc -Wall -c ../parser.c
-	
+.PHONY: clean mrproper listfiles
+
 clean:
-	rm *.o
+	@rm -rf *.o 
+	@echo "Objects(.o) removed: $(wildcard *.o)"
+	
+mrproper:
+	@rm -rf  $(EXEC)
+	@echo "Exec removed : $(EXEC)"
+
+listfiles:
+	@echo "Sources: $(SRC)"
+	@echo "Includes: $(INCLUDES)"
+	@echo "Objets: $(OBJ)"
+	@echo "Exec: $(EXEC)"

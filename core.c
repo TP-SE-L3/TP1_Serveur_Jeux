@@ -75,7 +75,7 @@ int recvHeader(SOCKET sock, header_t* header){
 
 int recvMessage(SOCKET sock, header_t header){
 	char* message = malloc(header.size * sizeof(char));
-	if(recv(sock, header.size, sizeof(message), 0) == -1){
+	if(recv(sock, message, header.size, 0) == -1){
 		perror("Error recv");
 		return -1;
 	}
