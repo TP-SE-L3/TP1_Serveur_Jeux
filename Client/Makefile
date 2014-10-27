@@ -8,12 +8,12 @@ OBJ = $(SRC:.c=.o)
 all: $(EXEC)
 
 $(EXEC): $(OBJ)
-	$(CC) $(CFLAGS) -o $(EXEC) $(OBJ)
+	$(CC) $(CFLAGS) -o $(EXEC) $(OBJ) $(INCLUDES)
 
-mainC.o : mainC.c ../core.h
+mainC.o : mainC.c
 	$(CC) $(CFLAGS) -c $^
 
-%.o: ../%.c ../%.h
+%.o: ../%.c
 	$(CC) $(CFLAGS) -c $^
 
 

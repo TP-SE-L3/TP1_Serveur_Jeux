@@ -7,7 +7,7 @@
 #include "core.h"
 #include "utils.h"
 #include "parser.h"
-
+#include "linkedlist.h"
 
 int sendMessage(SOCKET s, char* format, ...){
   int i;
@@ -76,17 +76,38 @@ int recvHeader(SOCKET sock, header_t* header){
 
 int recvMessage(SOCKET sock, header_t header){
 	char* message = malloc(header.size * sizeof(char));
+	char* startMsg = message; // Permet de connaître la première adresse en mémoire du msg pour pouvoir la libérer par la suite
 	command_t commande;
+	element* el = NULL;
+	int elInt;
+	char* elString;
+	
 	if(recv(sock, message, header.size, 0) == -1){
 		perror("Error recv");
 		return -1;
 	}
 	printf("Message %s\n", message);
-	commande = getCommand(message);
+	commande = getCommand(&message);
 	printf("Commande: %s\n", commande.name);
-	//printf("Commande: %s\n", commande.strArgs);
+	printf("Ma string : %s\n", message);
 	
-	free(message);
+	free(startMsg);
+	
+	while(!isEmptyL(commande.args)){
+		el = popL(&commande.args);
+
+		if(el->type == INT){
+			elInt = (int)el->val;
+			printf("Arg: %d\n", elInt);
+		}
+		else if(el->type == STRING){
+			elString = el->val;
+			printf("Arg: %s\n", elString);
+		}
+		free(el);
+	}
+	
+	
 	return 0;
 }
 
