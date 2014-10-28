@@ -20,8 +20,11 @@ int main(){
 		socklen_t lenAddrServ = sizeof(addrServ);
 		int sockOptions = 1;
 		char message[256];
-		char* msgToSend = "cmd:out [\"Entrez une un nombre : \"]; cmd:in [ \"%d\"];";
-		header_t header = {1, 10};
+		char* msgToSend = "cmd:out [\"Entrez un nombre : \"]; cmd:in [ \"%d\"];";
+		header_t header;
+		
+		int currentId = 1; // L'id que l'on attribut aux client (A chaque fois qu'il y a un nouveau client, il est incrémenté)
+		
 		/*fd_set readfs;
 		FD_ZERO(&readfs);
 		struct timeval timeout;
@@ -61,16 +64,28 @@ int main(){
 		while(1){
 			sockCli = accept(sockServ, (struct sockaddr*)&addrServ, &lenAddrServ);
 			if(sockCli == - 1){
-					perror("Error Accept");
+				perror("Error Accept");
 			}
-			printf("-> Nouveau client sur le socket : %d", (int)sockCli);
+			
+			printf("-> Client sur le socket : %d\n", (int)sockCli);
 			
 			
-			if(recv(sockCli, message, sizeof(message), 0) == -1){
-				perror("Error recv");
+			if(recvHeader(sockCli, &header) == -1){
+				perror("Erreur dans la réception de l'entete d'un client");
 				exit(EXIT_FAILURE);
 			}
-			printf("Msg : %s\n", message);
+			if(header.id == -1){ // Le client n'a pas encore d'ID, il faut lui en attribuer un
+				header.id = currentId;
+				currentId++;
+			}
+			if(header.size != -1){ // Aucun message à recevoir
+				if(recv(sockCli, message, sizeof(message), 0) == -1){
+					perror("Error recv");
+					exit(EXIT_FAILURE);
+				}
+				printf("Msg : %s et header.id : %d\n", message, header.id);
+			}
+			
 			header.size = strlen(msgToSend)+1;
 			sendHeader(sockCli, header);
 			sendMessage(sockCli, "%s", msgToSend);

@@ -15,75 +15,69 @@
 /* Main coté Client */
 int main(){
 	SOCKET sock;
-	struct sockaddr_in sin = {0};
-	int sockOptions = 1;
-	char* format = "-> MSG : %s \n-> Id : %d";
-	header_t header;
+	header_t header = {-1,-1,-1}; // Servira de header de réception et d'envoi, il faudra juste changer la taille
 	char* message = NULL;
 	char* startMsg; // Permet de connaître la première adresse en mémoire du msg pour pouvoir la libérer par la suite
+	char* responseForServ = NULL; // La réponse que l'on envoie au serveur
+	int initCo = 1; // Quand initCo == 1 il faut juste envoyer un header au serveur pour qu'il donne un id au client
+	
 	
 	linkedlist_t listResp = NULL; // La liste des réponses de commande 
 	command_t command = {NULL, NULL};
 	
 	
-	sock = socket(AF_INET, SOCK_STREAM, 0);
-	if(sock == -1){
-			perror("Error socket");
+	while(1){
+		sock = connectCli("127.0.0.1");
+		
+		
+		printf("Connexion serveur OK\n");
+		
+		if(initCo == 1){ // On veut initialiser la connexion
+			if(sendHeader(sock, header) == -1){
+				perror("Erreur dans l'envoi de l'entete au serveur");
+				exit(EXIT_FAILURE);
+			}
+			initCo = 0; // La connexion est initialisé, le serveur va envoyer les données
+		}
+		else if(responseForServ != NULL){
+			header.size = strlen(responseForServ)+1;
+			if(sendHeader(sock, header) == -1){
+				perror("Erreur dans l'envoi de l'entete au serveur");
+				exit(EXIT_FAILURE);
+			}
+			sendMessage(sock, "%s", responseForServ);
+			free(responseForServ);
+		}
+		// Dans les ca où il n'y a pas de réponse à envoyer, on attend des données du serveur
+		
+		
+		if(recvHeader(sock, &header) == -1){
+			perror("Erreur dans la réception de l'entete");
 			exit(EXIT_FAILURE);
-	}
-	memset(&sin, 0, sizeof(sin));
-	sin.sin_family = AF_INET;
-	sin.sin_port = htons(PORT);
-	sin.sin_addr.s_addr = inet_addr("127.0.0.1");
-	
-	// Permet de ne pas avoir d'erreur de type : endpoint is not connected
-	if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &sockOptions, sizeof(sockOptions)) == -1){
-		perror("Error setsockopt");
-		exit(EXIT_FAILURE);
-	}
-	
-	
-	if(connect(sock, (struct sockaddr*)&sin, sizeof(sin)) == -1){
-		perror("Error server connection");
-		exit(EXIT_FAILURE);
-	}
-	
-	printf("Connexion serveur OK\n");
-	
-	
-	
-	sendMessage(sock, format, "Bonjour je suis un client", 10);
-	
-	if(recvHeader(sock, &header) == -1){
-			perror("Error recv header");
+		}
+		
+		message = recvMessage(sock, header); // Reception du message
+		if(message == NULL){
+			perror("Erreur dans la reception du message");
 			exit(EXIT_FAILURE);
+		}
+		if(shutdown(sock, SHUT_RDWR) == -1){
+			perror("Erreur pendant la fermeture du socket.");
+			exit(EXIT_FAILURE);
+		}
+		close(sock);
+		
+		
+		startMsg = message;
+		do{ // Récupère et interprète toutes les commandes
+			command = getCommand(&message);
+			listResp = performCommandCli(&command, listResp);
+			command.args = cleanL(command.args); // Vide la liste d'arguments s'il en reste
+		}while(command.name != NULL);
+		
+		responseForServ = formatResponse(&listResp);
+		free(startMsg);
 	}
-	
-	message = recvMessage(sock, header); // Reception du message
-	if(message == NULL){
-		perror("Erreur dans la reception du message");
-		exit(EXIT_FAILURE);
-	}
-	startMsg = message;
-	
-	if(shutdown(sock, SHUT_RDWR) == -1){
-		perror("Erreur pendant la fermeture du socket.");
-		exit(EXIT_FAILURE);
-	}
-	close(sock);
-	
-	
-	do{
-		command = getCommand(&message);
-		listResp = performCommandCli(&command, listResp);
-		command.args = cleanL(command.args); // Vide la liste d'arguments s'il en reste
-	}while(command.name != NULL);
-	element* el;
-	el = popL(&listResp);
-	printf("El->type : %d et INT : %d et el->val: %d\n", INT, el->type, (int)el->val);
-	
-	free(startMsg);
-	
 	
 	return EXIT_SUCCESS;
 }

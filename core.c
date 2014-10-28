@@ -9,6 +9,73 @@
 #include "parser.h"
 #include "linkedlist.h"
 
+
+
+
+SOCKET connectServ(const char* servIP, int nbCli, SOCKADDR_IN* addrServ){
+	SOCKET sockServ;
+	int sockOptions = 1;
+	
+	sockServ = socket(AF_INET, SOCK_STREAM, 0);
+	if(sockServ == -1){ 
+			perror("Error socket");
+			exit(EXIT_FAILURE);
+	}
+	memset(&addrServ, 0, sizeof(*addrServ));
+	addrServ->sin_addr.s_addr = inet_addr(servIP);  // aussi : htonl(INADDR_ANY) -> toutes les addresses
+	addrServ->sin_family = AF_INET;
+	addrServ->sin_port = htons(PORT);
+	
+	// Permet de pouvoir réutiliser l'addresse du bind en relançant le programme
+	// Empèche l'erreur -> Bind : Address already in use
+	if(setsockopt(sockServ, SOL_SOCKET, SO_REUSEADDR, &sockOptions, sizeof(sockOptions)) == -1){
+		perror("Error setsockopt");
+		exit(EXIT_FAILURE);
+	}
+	
+	if(bind(sockServ, (struct sockaddr*)addrServ, sizeof(*addrServ)) == -1){
+			perror("Error Bind");
+			exit(EXIT_FAILURE);
+	}
+	
+	/*FD_SET(sockServ, &readfs);
+	res = select(sockServ+1, &readfs, NULL, NULL, &timeout);*/
+				
+	if(listen(sockServ, nbCli) == -1){
+		perror("Error Listen");
+		exit(EXIT_FAILURE);
+	}
+	return sockServ;
+}
+
+SOCKET connectCli(const char* servIP){
+	struct sockaddr_in sin = {0};
+	int sockOptions = 1;
+	SOCKET sock;
+	sock = socket(AF_INET, SOCK_STREAM, 0);
+	if(sock == -1){
+			perror("Error socket");
+			exit(EXIT_FAILURE);
+	}
+	memset(&sin, 0, sizeof(sin));
+	sin.sin_family = AF_INET;
+	sin.sin_port = htons(PORT);
+	sin.sin_addr.s_addr = inet_addr(servIP);
+	
+	// Permet de ne pas avoir d'erreur de type : endpoint is not connected
+	if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &sockOptions, sizeof(sockOptions)) == -1){
+		perror("Erreur avec la fonction setsockopt()");
+		exit(EXIT_FAILURE);
+	}
+	
+	if(connect(sock, (struct sockaddr*)&sin, sizeof(sin)) == -1){
+		perror("Erreur pendant la connexion au serveur.");
+		exit(EXIT_FAILURE);
+	}
+	return sock;
+}
+
+
 int sendMessage(SOCKET s, char* format, ...){
   int i;
   int res;
@@ -40,6 +107,17 @@ int sendMessage(SOCKET s, char* format, ...){
   return i;
 }
 
+int sendHeader(SOCKET sock, header_t header){
+	char message[SIZE_HEADER];
+	int i;
+	sprintf(message, "[ID:%d ID_GAME:%d SIZE:%d]", header.id, header.idGame, header.size);
+	for(i=strlen(message); i < SIZE_HEADER; i++){
+		message[i] = ' '; // On remplit la fin de chaine avec des espaces
+	}
+	return sendMessage(sock, "%s", message); // Ici la va_list ne sert à rien
+}
+
+
 int recvHeader(SOCKET sock, header_t* header){
 	char message[SIZE_HEADER];
 	char* strCurrent; // Chaine qui va être modifée, petit à petit pour récupérer les bon éléments
@@ -55,14 +133,21 @@ int recvHeader(SOCKET sock, header_t* header){
 	// Revoir le nom des variables
 	// Les paramètres doivent être dans le bon ordre (1:ID, 2:SIZE)
 	strCurrent = strbtw(message, '[', ']');
-	resStr = strstr(strCurrent, "ID:");
+	resStr = strstr(strCurrent, "ID:"); // Récupère l'id du joueur
 	if(resStr != NULL){
 		strCurrent = resStr;
 		idStr = strCurrent+strlen("ID:");
 		strCurrent = substrpbrk(idStr, " \0");
 		header->id = atoi(idStr); // Peut utiliser strtol, avec gestion d'erreur
 	}
-	resStr = strstr(strCurrent, "SIZE:");
+	resStr = strstr(strCurrent, "ID_GAME:"); // Récupère l'id du jeu
+	if(resStr != NULL){
+		strCurrent = resStr;
+		idStr = strCurrent+strlen("ID_GAME:");
+		strCurrent = substrpbrk(idStr, " \0");
+		header->idGame = atoi(idStr); // Peut utiliser strtol, avec gestion d'erreur
+	}
+	resStr = strstr(strCurrent, "SIZE:"); // La taille du message suivant
 	if(strCurrent != NULL){
 		strCurrent = resStr;
 		sizeStr = strCurrent+strlen("SIZE:");
@@ -73,6 +158,7 @@ int recvHeader(SOCKET sock, header_t* header){
 	return 0;
 }
 
+
 char* recvMessage(SOCKET sock, header_t header){
 	char* message = malloc(header.size * sizeof(char));
 	
@@ -81,15 +167,4 @@ char* recvMessage(SOCKET sock, header_t header){
 		return NULL;
 	}
 	return message;
-}
-
-
-int sendHeader(SOCKET sock, header_t header){
-	char message[SIZE_HEADER];
-	int i;
-	sprintf(message, "[ID:%d SIZE:%d]", header.id, header.size);
-	for(i=strlen(message); i < SIZE_HEADER; i++){
-		message[i] = ' '; // On remplit la fin de chaine avec des espaces
-	}
-	return sendMessage(sock, "%s", message); // Ici la va_list ne sert à rien
 }

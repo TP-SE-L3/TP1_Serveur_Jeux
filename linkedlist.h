@@ -3,7 +3,6 @@
 
 typedef enum Type_e{
 	INT,
-	FLOAT,
 	STRING
 } Type_e;
 
@@ -11,7 +10,7 @@ typedef enum Type_e{
 
 typedef struct element element;
 struct element{
-	void* val;
+	void** val; // Double, car il faut pouvoir changer l'adresse du pointer (pour les float, double...)
 	Type_e type;
 	element* next;
 };

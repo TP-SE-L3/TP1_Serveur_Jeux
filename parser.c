@@ -72,14 +72,16 @@ char* formatResponse(linkedlist_t* listResp){
 	element* el;
 	char bufNumber[10]; // Chaine de caractère qui permettra de savoir combien de caractères prend un nombre
 	int sizeStr = 0;
+	char* strResp = NULL; // La chaine de réponse
 	
+	if(*listResp == NULL){
+		return NULL;
+	}
+	// Calcule la taille de la chaine de réponse
 	for(el = *listResp; el != NULL; el = el->next){
-		switch(el->type){
+		switch(el->type){ // switch au cas où l'on rajoute d'autre types plus tard
 			case INT:
 				sizeStr += sprintf(bufNumber, "%d", (int)el->val);
-			break;
-			case FLOAT:
-				sizeStr += sprintf(bufNumber, "%f", *(float*)el->val); // Vérifier !!!!!!!!!!!!
 			break;
 			case STRING:
 				sizeStr += strlen((char*)el->val) + 2; // +2: Les guillemets
@@ -87,8 +89,34 @@ char* formatResponse(linkedlist_t* listResp){
 			default: break;
 		}
 	}
-	sizeStr += sizeL(*listResp)-1 + 4; // sizeL-1 : Les espaces et 4: '[', ']', ';' '\0'
 	
+	if(sizeStr != 0){
+		sizeStr += sizeL(*listResp)-1 + 4; // sizeL-1 : Les espaces et 4: '[', ']', ';' '\0'
+		
+		strResp = malloc(sizeStr * sizeof(char));
+		*strResp = '[';
+		while(!isEmptyL(*listResp)){
+			el = popL(listResp);
+			switch(el->type){
+				case INT:
+					sprintf(bufNumber, "%d", (int)el->val);
+					strcat(strResp, bufNumber);
+				break;
+				case STRING:
+					strcat(strResp, "\"");
+					strcat(strResp, (char*)el->val);
+					strcat(strResp, "\"");
+					free(el->val);
+				break;
+				default: break;
+			}
+			free(el);
+		}
 
-
+		strcat(strResp, "];");
+	}
+	
+	printf("StrResp : %s et len : %d\n", strResp, strlen(strResp));
+	
+	return strResp;
 }

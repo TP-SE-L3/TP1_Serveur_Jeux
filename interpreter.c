@@ -42,7 +42,6 @@ linkedlist_t performIn(linkedlist_t *args, linkedlist_t listResp){
 	int size = 10; // Si le scanf est une chaine, on défini la taille chaine entrée
 	int resInt;
 	char* resChar = NULL;
-	float resFloat;
 	
 	if(!isEmptyL(*args)){
 		el = popL(args);
@@ -57,13 +56,9 @@ linkedlist_t performIn(linkedlist_t *args, linkedlist_t listResp){
 				scanf("%s", resChar);
 				listResp = addHeadL(listResp, (void*)resChar, STRING);
 			}
-			else if(strcmp(val, "%d") == 0){;
+			else if(strcmp(val, "%d") == 0){ // INT
 				scanf("%d", &resInt);
 				listResp = addHeadL(listResp, (void*)resInt, INT);
-			}
-			else if(strcmp(val, "%f") == 0){ // Il est difficile de récupérer un float, ne pas les privilégier
-				scanf("%f", &resFloat);
-				listResp = addHeadL(listResp, &resFloat, FLOAT); // Attention ici c'est l'adresse qui est enregistrée !!!!
 			}
 		}
 	}
