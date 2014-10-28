@@ -36,4 +36,9 @@ command_t getCommand(char** str);
 */
 TypeArg_e recupArg(char** str, char** startArg);
 
+
+/* Peremet de formater une réponse en chaîne à partir d'une listechainée
+ * Retourne une chaine contenant les éléments de réponse (Attention il faudra vider la mémoire)
+ * @param listResp: Liste chainée contenant toutes le éléments de réponse*/
+char* formatResponse(linkedlist_t* listResp);
 #endif

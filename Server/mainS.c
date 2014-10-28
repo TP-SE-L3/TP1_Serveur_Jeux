@@ -20,7 +20,7 @@ int main(){
 		socklen_t lenAddrServ = sizeof(addrServ);
 		int sockOptions = 1;
 		char message[256];
-		char* msgToSend = "cmd:out [    10  \"Salute\"];";
+		char* msgToSend = "cmd:out [\"Entrez une un nombre : \"]; cmd:in [ \"%d\"];";
 		header_t header = {1, 10};
 		/*fd_set readfs;
 		FD_ZERO(&readfs);

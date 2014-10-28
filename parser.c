@@ -22,18 +22,17 @@ command_t getCommand(char** str){
 	*str = substrpbrk(resStr, " ;\n");
 	if(**str == '['){
 		*str += 1;
-		
 		while(**str != ']' && **str != ';' && **str != '\0'){
 			resTypeArg = recupArg(str, &arg);
 			if(resTypeArg == A_ERROR){ // Argument introuvable
 				break;
 			}
 			else if(resTypeArg == A_STRING){ // Ajoute une Chaine
-				printf("Chaine : %s et str: %s\n", arg, *str);
+				//printf("Chaine : %s et str: %s\n", arg, *str);
 				command.args = addHeadL(command.args, (void*)arg, STRING);
 			}
 			else{ // Ajoute un nombre
-				printf("Nombre : %d et str: %s\n", atoi(arg), *str);
+				//printf("Nombre : %d et str: %s\n", atoi(arg), *str);
 				command.args = addHeadL(command.args, (void*)atoi(arg), INT);
 			}
 		}
@@ -66,4 +65,30 @@ TypeArg_e recupArg(char** str, char** startArg){
 		*str = *str+1;
 	}
 	return ret;
+}
+
+
+char* formatResponse(linkedlist_t* listResp){
+	element* el;
+	char bufNumber[10]; // Chaine de caractère qui permettra de savoir combien de caractères prend un nombre
+	int sizeStr = 0;
+	
+	for(el = *listResp; el != NULL; el = el->next){
+		switch(el->type){
+			case INT:
+				sizeStr += sprintf(bufNumber, "%d", (int)el->val);
+			break;
+			case FLOAT:
+				sizeStr += sprintf(bufNumber, "%f", *(float*)el->val); // Vérifier !!!!!!!!!!!!
+			break;
+			case STRING:
+				sizeStr += strlen((char*)el->val) + 2; // +2: Les guillemets
+			break;
+			default: break;
+		}
+	}
+	sizeStr += sizeL(*listResp)-1 + 4; // sizeL-1 : Les espaces et 4: '[', ']', ';' '\0'
+	
+
+
 }

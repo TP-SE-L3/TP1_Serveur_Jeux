@@ -52,7 +52,6 @@ int recvHeader(SOCKET sock, header_t* header){
 		perror("Error recv");
 		return -1;
 	}
-	printf("%s-->s:%d\n", message, strlen(message));
 	// Revoir le nom des variables
 	// Les paramètres doivent être dans le bon ordre (1:ID, 2:SIZE)
 	strCurrent = strbtw(message, '[', ']');
@@ -74,41 +73,14 @@ int recvHeader(SOCKET sock, header_t* header){
 	return 0;
 }
 
-int recvMessage(SOCKET sock, header_t header){
+char* recvMessage(SOCKET sock, header_t header){
 	char* message = malloc(header.size * sizeof(char));
-	char* startMsg = message; // Permet de connaître la première adresse en mémoire du msg pour pouvoir la libérer par la suite
-	command_t commande;
-	element* el = NULL;
-	int elInt;
-	char* elString;
 	
 	if(recv(sock, message, header.size, 0) == -1){
 		perror("Error recv");
-		return -1;
+		return NULL;
 	}
-	printf("Message %s\n", message);
-	commande = getCommand(&message);
-	printf("Commande: %s\n", commande.name);
-	printf("Ma string : %s\n", message);
-	
-	free(startMsg);
-	
-	while(!isEmptyL(commande.args)){
-		el = popL(&commande.args);
-
-		if(el->type == INT){
-			elInt = (int)el->val;
-			printf("Arg: %d\n", elInt);
-		}
-		else if(el->type == STRING){
-			elString = el->val;
-			printf("Arg: %s\n", elString);
-		}
-		free(el);
-	}
-	
-	
-	return 0;
+	return message;
 }
 
 

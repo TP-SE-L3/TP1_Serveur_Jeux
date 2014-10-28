@@ -25,6 +25,11 @@ linkedlist_t addQueueL(linkedlist_t list, void* val, Type_e typeVal){
 	return list;
 }
 
+linkedlist_t addElemHeadL(linkedlist_t list, element* elem){
+	elem->next = list;
+	return elem;
+}
+
 element* popL(linkedlist_t* list){
 	element* tmp;
 	element* elemPre = NULL; // L'élément courrant précédent
@@ -72,4 +77,31 @@ linkedlist_t cleanL(linkedlist_t list){
 		}while(tmp != NULL);
 	}
 	return NULL;
+}
+
+linkedlist_t mergeL(linkedlist_t list1, linkedlist_t list2){
+	element* tmp;
+	
+	if(list1 == NULL){
+		return list2;
+	}
+	for(tmp = list1; tmp->next != NULL; tmp = tmp->next);
+	tmp->next = list2;
+	return list1;
+}
+
+
+
+int nbOccTypeL(linkedlist_t list, Type_e type){
+	element* tmp;
+	int nb = 0;
+	if(list == NULL){
+		return 0;
+	}
+	for(tmp = list; tmp != NULL; tmp = tmp->next){
+		if(tmp->type == type){
+			nb++;
+		}
+	}
+	return nb;
 }

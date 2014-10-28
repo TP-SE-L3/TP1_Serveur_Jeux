@@ -49,4 +49,9 @@ int sendMessage(SOCKET s, char* format, ...);
 int recvHeader(SOCKET sock, struct header_t* header);
 int sendHeader(SOCKET sock, header_t header);
 
-int recvMessage(SOCKET sock, header_t header);
+/* Retourne une chaine contenant le message reçus
+ * NULL si erreur, Attention la place devra être libérée
+ * @param sock: socket sur lequel il faut lire
+ * @param header: structure contenant les informations sur le message
+*/
+char* recvMessage(SOCKET sock, header_t header);
