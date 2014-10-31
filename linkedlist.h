@@ -3,6 +3,7 @@
 
 typedef enum Type_e{
 	INT,
+	FLOAT,
 	STRING
 } Type_e;
 

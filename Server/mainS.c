@@ -24,7 +24,7 @@ int main(){
 		header_t header;
 		
 		linkedlist_t respCli;
-		char* msgToSend = NULL;
+		char* msgToSend;
 		int currentId = 1; // L'id que l'on attribut aux client (A chaque fois qu'il y a un nouveau client, il est incrémenté)
 		
 		/*fd_set readfs;
@@ -68,7 +68,6 @@ int main(){
 			if(sockCli == - 1){
 				perror("Error Accept");
 			}
-			
 			printf("-> Client sur le socket : %d\n", (int)sockCli);
 			
 			
@@ -80,8 +79,8 @@ int main(){
 				header.id = currentId;
 				currentId++;
 			}
-			if(header.size != -1){ // Aucun message à recevoir
-				if(recv(sockCli, message, sizeof(message), 0) == -1){
+			if(header.size != -1){ // Si -1, aucun msg à recevoir
+				if(recv(sockCli, message, header.size, 0) == -1){
 					perror("Error recv");
 					exit(EXIT_FAILURE);
 				}
@@ -90,14 +89,15 @@ int main(){
 			
 			respCli = NULL;
 			msgToSend = gameManager(&header.idGame, header.id, respCli);
-			
-			
-			header.size = strlen(msgToSend)+1;
-			sendHeader(sockCli, header);
-			sendMessage(sockCli, "%s", msgToSend);
+			if(msgToSend != NULL){
+				header.size = strlen(msgToSend)+1;
+				sendHeader(sockCli, header);
+				sendMessage(sockCli, "%s", msgToSend);
+				free(msgToSend);
+			}
 			
 			/*----------- Trouver comment libérer la mémoire ------------*/
-			//if(msgToSend != NULL) free(msgToSend);
+			//if(msgToSend != NULL) 
 			
 			if(shutdown(sockCli, SHUT_RDWR) == -1){
 				perror("Error to shutdown sockets");
@@ -106,33 +106,6 @@ int main(){
 			close(sockCli);
 		}
 		
-		/*char choice[50] = "";
-		int continu = 1;*/
-		/*while(continu == 1){
-			//system("clear");
-			printf("======== MENU PRINCIPAL =========\n");
-			printf("A quel jeux voulez-vous jouer ?\n");
-			printf(" 1. Connexion\n");
-			printf(" 2. Msg\n");
-			printf(" 3. Bataille Naval\n");
-			printf(" 4. Quitter\n");
-			scanf("%s", choice);
-			switch(choice[0]){
-					case '1':
-					break;
-					case '2':
-					break;
-					case '3':
-						printf(" Bataill\n");
-					break;
-					case '4':
-						continu = 0;
-					break;
-					default:
-						printf("Votre choix est invlide.\n");
-					break;
-			}
-		}*/
 		
 		
 		return 0;

@@ -70,7 +70,7 @@ TypeArg_e recupArg(char** str, char** startArg){
 
 char* formatResponse(linkedlist_t* listResp){
 	element* el;
-	char bufNumber[10]; // Chaine de caractère qui permettra de savoir combien de caractères prend un nombre
+	char bufNumber[15]; // Chaine de caractère qui permettra de savoir combien de caractères prend un nombre
 	int sizeStr = 0;
 	char* strResp = NULL; // La chaine de réponse
 	
@@ -82,6 +82,9 @@ char* formatResponse(linkedlist_t* listResp){
 		switch(el->type){ // switch au cas où l'on rajoute d'autre types plus tard
 			case INT:
 				sizeStr += sprintf(bufNumber, "%d", (int)el->val);
+			break;
+			case FLOAT:
+				sizeStr += sprintf(bufNumber, "%f", *(float*)el->val);
 			break;
 			case STRING:
 				sizeStr += strlen((char*)el->val) + 2; // +2: Les guillemets
@@ -102,6 +105,11 @@ char* formatResponse(linkedlist_t* listResp){
 				case INT:
 					sprintf(bufNumber, "%d", (int)el->val);
 					strcat(strResp, bufNumber);
+				break;
+				case FLOAT:
+					sprintf(bufNumber, "%f", *(float*)el->val);
+					strcat(strResp, bufNumber);
+					free((float*)el->val);
 				break;
 				case STRING:
 					strcat(strResp, "\"");

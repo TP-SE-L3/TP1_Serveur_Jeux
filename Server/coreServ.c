@@ -15,20 +15,19 @@
 char* gameManager(int* idGame, int idCli, linkedlist_t args){
 	linkedlist_t listCommand = NULL;
 	
-	char* commands;// = "cmd:out [\"Entrez un nombre : \"]; cmd:in [ \"%d\"];";
-	
-	char* test = NULL;
-	listCommand = outc(listCommand,"%s %d %s", "Entrez le nombre ", 2, " : ");
-	listCommand = inc(listCommand, "%d");
-	
-	if(*idGame == -1){
-		
-	}
-	
-	printf("Command size : %d\n", sizeL(listCommand));
+	//char* commands = "cmd:out [\"Entrez un nombre : \"]; cmd:in [ \"%d\"];";
+	char* commands = NULL;
+	//~ listCommand = outc(listCommand,"%s %d %s", "Entrez le nombre ", 2, ".3 : ");
+	listCommand = inc(listCommand, "%s");
+	//~ 
+	//~ if(*idGame == -1){
+		//~ 
+	//~ }
+	//~ 
+	//~ printf("Command size : %d\n", sizeL(listCommand));
 	commands = listToStringL(listCommand);
 	listCommand = cleanL(listCommand); // Vide la liste
-	printf("Commande : %s\n", commands);
+	//~ printf("Commande : %s\n", commands);
 	
 	return commands;
 }
@@ -66,7 +65,6 @@ linkedlist_t outc(linkedlist_t listCommand, char* format, ...){
 	va_start(listArgs, format);
 	vsnprintf(command, taille+1, nwFormat, listArgs);
 	va_end(listArgs);
-	printf("OUT : %s", command);
 	return addQueueL(listCommand, (void*)command, STRING); // ajoute la comande à la liste
 }
 

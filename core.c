@@ -51,13 +51,13 @@ int sendMessage(SOCKET s, char* format, ...){
   int taille = vsnprintf(NULL, 0, format, listArgs);
   va_end(listArgs);
 
-  // un tableau un peu plus grand pour le \0
-  char chaine[taille+1];
 
-  va_start(listArgs, format);
-  vsnprintf(chaine, taille+1, format, listArgs);
-  va_end(listArgs);
+	  // un tableau un peu plus grand pour le \0
+	  char chaine[taille+1];
 
+	  va_start(listArgs, format);
+	  vsnprintf(chaine, taille+1, format, listArgs);
+	  va_end(listArgs);
   i = 0;
   while (i < taille) { // attention, il ne faut pas envoyer le \0
     res = send(s, chaine+i, taille-i, MSG_NOSIGNAL);
@@ -75,6 +75,7 @@ int sendHeader(SOCKET sock, header_t header){
 	char message[SIZE_HEADER];
 	int i;
 	sprintf(message, "[ID:%d ID_GAME:%d SIZE:%d]", header.id, header.idGame, header.size);
+	printf("Header : %s\n", message);
 	for(i=strlen(message); i < SIZE_HEADER; i++){
 		message[i] = ' '; // On remplit la fin de chaine avec des espaces
 	}
@@ -94,6 +95,7 @@ int recvHeader(SOCKET sock, header_t* header){
 		perror("Error recv");
 		return -1;
 	}
+	printf("Header -> %s\n", message);
 	// Revoir le nom des variables
 	// Les paramètres doivent être dans le bon ordre (1:ID, 2:SIZE)
 	strCurrent = strbtw(message, '[', ']');

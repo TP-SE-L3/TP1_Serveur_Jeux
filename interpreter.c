@@ -42,6 +42,7 @@ linkedlist_t performIn(linkedlist_t *args, linkedlist_t listResp){
 	int size = 10; // Si le scanf est une chaine, on défini la taille chaine entrée
 	int resInt;
 	char* resChar = NULL;
+	float* resFloat = NULL;
 	
 	if(!isEmptyL(*args)){
 		el = popL(args);
@@ -59,6 +60,11 @@ linkedlist_t performIn(linkedlist_t *args, linkedlist_t listResp){
 			else if(strcmp(val, "%d") == 0){ // INT
 				scanf("%d", &resInt);
 				listResp = addHeadL(listResp, (void*)resInt, INT);
+			}
+			else if(strcmp(val, "%f") == 0){
+				resFloat = malloc(sizeof(float));
+				*resFloat = 2.0;
+				listResp = addHeadL(listResp, resFloat, FLOAT);
 			}
 		}
 	}

@@ -30,7 +30,7 @@ typedef struct in_addr IN_ADDR;
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
 #define PORT 2000
-#define SIZE_HEADER 30
+#define SIZE_HEADER 40
 
 #define TRUE 1
 #define FALSE 0
