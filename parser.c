@@ -95,6 +95,7 @@ char* formatResponse(linkedlist_t* listResp){
 		
 		strResp = malloc(sizeStr * sizeof(char));
 		*strResp = '[';
+		*(strResp+1) = '\0'; // Pour ne pas avoir de problème avec strcat
 		while(!isEmptyL(*listResp)){
 			el = popL(listResp);
 			switch(el->type){

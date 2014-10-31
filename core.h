@@ -1,3 +1,6 @@
+#ifndef CORE_H
+#define CORE_H
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
@@ -71,3 +74,5 @@ int recvHeader(SOCKET sock, header_t* header);
  * @param header: structure contenant les informations sur le message
 */
 char* recvMessage(SOCKET sock, header_t header);
+
+#endif

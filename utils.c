@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "utils.h"
 
 int stroc(char* str1, char* str2){
@@ -43,4 +44,18 @@ char* substrpbrk(char* str, char* end){
 		}
 	}
 	return NULL;
+}
+
+int nbstr(char* str, const char* word){
+	int nbW = 0;
+	int i,j;
+	int sizeW = strlen(word);
+	for(i=0; *(str+i) != '\0'; i++){
+		for(j=0; *(word+j) == *(str+i+j) && *(word+j) != '\0' && *(str+i+j) != '\0'; j++);
+		if(j == sizeW){
+			nbW++;
+			i += j; // i fait un saut après le mot trouvé
+		}
+	}
+	return nbW;
 }

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "linkedlist.h"
 
 
@@ -104,4 +105,37 @@ int nbOccTypeL(linkedlist_t list, Type_e type){
 		}
 	}
 	return nb;
+}
+
+char* listToStringL(linkedlist_t list){
+	element* tmp;
+	char buff[10];
+	char* strRet = NULL;
+	int size = 0; // Taille de la chaine
+	if(list == NULL){
+		return NULL;
+	}
+	for(tmp = list; tmp != NULL; tmp = tmp->next){
+		if(tmp->type == INT){
+			size = sprintf(buff, "%d", (int)tmp->val);
+		}
+		else if(tmp->type == STRING){
+			size = strlen((char*)tmp->val);
+		}
+	}
+	if(size == 0){
+		return NULL;
+	}
+	strRet = malloc((size+1) * sizeof(char));
+	*strRet = '\0'; // Pour que le strcat se face dès le début
+	for(tmp = list; tmp != NULL; tmp = tmp->next){
+		if(tmp->type == INT){
+			sprintf(buff, "%d", (int)tmp->val);
+			strcat(strRet, buff);
+		}
+		else if(tmp->type == STRING){
+			strcat(strRet, (char*)tmp->val);
+		}
+	}
+	return strRet;
 }

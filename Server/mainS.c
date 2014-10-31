@@ -9,8 +9,9 @@
 #include <errno.h>
 #include <stdarg.h>
 
-
+#include "coreServ.h"
 #include "../core.h"
+#include "../linkedlist.h"
 
 /* Main coté Serveur */
 
@@ -20,9 +21,10 @@ int main(){
 		socklen_t lenAddrServ = sizeof(addrServ);
 		int sockOptions = 1;
 		char message[256];
-		char* msgToSend = "cmd:out [\"Entrez un nombre : \"]; cmd:in [ \"%d\"];";
 		header_t header;
 		
+		linkedlist_t respCli;
+		char* msgToSend = NULL;
 		int currentId = 1; // L'id que l'on attribut aux client (A chaque fois qu'il y a un nouveau client, il est incrémenté)
 		
 		/*fd_set readfs;
@@ -86,11 +88,16 @@ int main(){
 				printf("Msg : %s et header.id : %d\n", message, header.id);
 			}
 			
+			respCli = NULL;
+			msgToSend = gameManager(&header.idGame, header.id, respCli);
+			
+			
 			header.size = strlen(msgToSend)+1;
 			sendHeader(sockCli, header);
 			sendMessage(sockCli, "%s", msgToSend);
 			
-			
+			/*----------- Trouver comment libérer la mémoire ------------*/
+			//if(msgToSend != NULL) free(msgToSend);
 			
 			if(shutdown(sockCli, SHUT_RDWR) == -1){
 				perror("Error to shutdown sockets");

@@ -11,43 +11,6 @@
 
 
 
-
-SOCKET connectServ(const char* servIP, int nbCli, SOCKADDR_IN* addrServ){
-	SOCKET sockServ;
-	int sockOptions = 1;
-	
-	sockServ = socket(AF_INET, SOCK_STREAM, 0);
-	if(sockServ == -1){ 
-			perror("Error socket");
-			exit(EXIT_FAILURE);
-	}
-	memset(&addrServ, 0, sizeof(*addrServ));
-	addrServ->sin_addr.s_addr = inet_addr(servIP);  // aussi : htonl(INADDR_ANY) -> toutes les addresses
-	addrServ->sin_family = AF_INET;
-	addrServ->sin_port = htons(PORT);
-	
-	// Permet de pouvoir réutiliser l'addresse du bind en relançant le programme
-	// Empèche l'erreur -> Bind : Address already in use
-	if(setsockopt(sockServ, SOL_SOCKET, SO_REUSEADDR, &sockOptions, sizeof(sockOptions)) == -1){
-		perror("Error setsockopt");
-		exit(EXIT_FAILURE);
-	}
-	
-	if(bind(sockServ, (struct sockaddr*)addrServ, sizeof(*addrServ)) == -1){
-			perror("Error Bind");
-			exit(EXIT_FAILURE);
-	}
-	
-	/*FD_SET(sockServ, &readfs);
-	res = select(sockServ+1, &readfs, NULL, NULL, &timeout);*/
-				
-	if(listen(sockServ, nbCli) == -1){
-		perror("Error Listen");
-		exit(EXIT_FAILURE);
-	}
-	return sockServ;
-}
-
 SOCKET connectCli(const char* servIP){
 	struct sockaddr_in sin = {0};
 	int sockOptions = 1;
@@ -82,7 +45,8 @@ int sendMessage(SOCKET s, char* format, ...){
 
   va_list listArgs;
   va_start(listArgs, format);
-
+ 
+  
   // on calcul la taille du message
   int taille = vsnprintf(NULL, 0, format, listArgs);
   va_end(listArgs);

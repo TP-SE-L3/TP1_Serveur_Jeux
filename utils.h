@@ -22,4 +22,9 @@ char* strbtw(char* str, char start, char end);
 */
 char* substrpbrk(char* str, char* end);
 
+/* Retourne le nombre de fois qu'un mot a été trouvé dans une chaine
+ * @param str: chaine dans laquelle on cherche
+ * @param word: le mot recherché
+ * */
+int nbstr(char* str, const char* word);
 #endif

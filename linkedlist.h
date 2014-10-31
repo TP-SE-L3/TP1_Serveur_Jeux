@@ -68,4 +68,8 @@ linkedlist_t mergeL(linkedlist_t list1, linkedlist_t list2);
  * @param type: le type d'élément que l'on cherche
  * */
 int nbOccTypeL(linkedlist_t list, Type_e type);
+
+/* Retourne la liste des éléments sous forme d'une chaine de caractères
+ * @param list: La liste à transformer en chaine*/
+char* listToStringL(linkedlist_t list);
 #endif

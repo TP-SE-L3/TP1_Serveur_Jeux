@@ -72,7 +72,7 @@ int main(){
 		do{ // Récupère et interprète toutes les commandes
 			command = getCommand(&message);
 			listResp = performCommandCli(&command, listResp);
-			command.args = cleanL(command.args); // Vide la liste d'arguments s'il en reste
+			command.args = cleanL(command.args, 0); // Vide la liste d'arguments s'il en reste
 		}while(command.name != NULL);
 		
 		responseForServ = formatResponse(&listResp);
