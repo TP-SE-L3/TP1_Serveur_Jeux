@@ -11,14 +11,18 @@
  * */
 char* gameManager(int* idGame, int idCli, linkedlist_t args);
 
+
+void outc(char** listCommand, char* format, ...);
+void inc(char** listCommand, char* format);
+
 /* Permet de rajouter une commande out à la liste des commandes
  * @param listCommand: la liste des commande (liste de chaines)
  * @param format: le format dans lequel on va mettre les arguments de la commande(!!Mettre de espace entre les éléments du format)
  * @param ... : Touts les arguments de la commande*/
-linkedlist_t outc(linkedlist_t listCommand, char* format, ...);
+void outc2(linkedlist_t *listCommand, char* format, ...);
 
 /* Permet de rajouter une commande in à la liste des commandes
  * @param listCommand: la liste des commande (liste de chaines)
  * @param format: Le format de la commande : "%n" avec n € {'s','d'}*/
-linkedlist_t inc(linkedlist_t listCommand, char* format);
+void inc2(linkedlist_t *listCommand, char* format);
 #endif

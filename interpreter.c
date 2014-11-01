@@ -63,7 +63,7 @@ linkedlist_t performIn(linkedlist_t *args, linkedlist_t listResp){
 			}
 			else if(strcmp(val, "%f") == 0){
 				resFloat = malloc(sizeof(float));
-				*resFloat = 2.0;
+				scanf("%f", resFloat);
 				listResp = addHeadL(listResp, resFloat, FLOAT);
 			}
 		}

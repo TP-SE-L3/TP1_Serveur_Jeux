@@ -89,15 +89,14 @@ int main(){
 			
 			respCli = NULL;
 			msgToSend = gameManager(&header.idGame, header.id, respCli);
+			printf("Msg to send : %s  et len : %d\n", msgToSend, strlen(msgToSend));
 			if(msgToSend != NULL){
 				header.size = strlen(msgToSend)+1;
 				sendHeader(sockCli, header);
 				sendMessage(sockCli, "%s", msgToSend);
-				free(msgToSend);
+				//free(msgToSend);
 			}
 			
-			/*----------- Trouver comment libérer la mémoire ------------*/
-			//if(msgToSend != NULL) 
 			
 			if(shutdown(sockCli, SHUT_RDWR) == -1){
 				perror("Error to shutdown sockets");

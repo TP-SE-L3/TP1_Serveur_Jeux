@@ -34,7 +34,7 @@ command_t getCommand(char** str);
  * @param str: référence sur la chaine dans laquelle on cherche l'arguement(Elle sera modifié)
  * @param startArg: contiendra une valeur de retour qui pointera sur l'adresse du pointer de début
 */
-TypeArg_e recupArg(char** str, char** startArg);
+TypeArg_e recupArg(char** str, char** arg);
 
 
 /* Peremet de formater une réponse en chaîne à partir d'une listechainée

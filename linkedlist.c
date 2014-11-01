@@ -65,7 +65,7 @@ int sizeL(linkedlist_t list){
 	return i;
 }
 
-linkedlist_t cleanL(linkedlist_t list){
+linkedlist_t cleanL(linkedlist_t list, int freeStr){
 	element* tmp;
 	element* elemNext;
 	
@@ -73,6 +73,9 @@ linkedlist_t cleanL(linkedlist_t list){
 		tmp = list;
 		do{
 			elemNext = tmp->next;
+			if(freeStr != 0 && tmp->type == STRING){
+				free((char*)tmp->val);
+			}
 			free(tmp);
 			tmp = elemNext;
 		}while(tmp != NULL);
@@ -117,16 +120,18 @@ char* listToStringL(linkedlist_t list){
 	}
 	for(tmp = list; tmp != NULL; tmp = tmp->next){
 		if(tmp->type == INT){
-			size = sprintf(buff, "%d", (int)tmp->val);
+			size += sprintf(buff, "%d", (int)tmp->val);
 		}
 		else if(tmp->type == STRING){
-			size = strlen((char*)tmp->val);
+			size += strlen((char*)tmp->val);
 		}
 	}
+	
 	if(size == 0){
 		return NULL;
 	}
-	strRet = malloc((size+1) * sizeof(char));
+	size++;
+	strRet = malloc(size * sizeof(char));
 	*strRet = '\0'; // Pour que le strcat se face dès le début
 	for(tmp = list; tmp != NULL; tmp = tmp->next){
 		if(tmp->type == INT){
@@ -137,5 +142,8 @@ char* listToStringL(linkedlist_t list){
 			strcat(strRet, (char*)tmp->val);
 		}
 	}
+	*(strRet + size-1) = '\0';
+	printf("StrRet %s size : %d et len %d\n", strRet, size, strlen(strRet));
+	
 	return strRet;
 }

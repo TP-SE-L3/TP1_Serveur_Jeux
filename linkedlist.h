@@ -54,8 +54,9 @@ int sizeL(linkedlist_t list);
 
 /* Vide la liste 
  * Retourne la nouvelle liste (NULL)
- * @param list: la liste à vider*/
-linkedlist_t cleanL(linkedlist_t list);
+ * @param list: la liste à vider
+ * @param freeStr: si != 0, libère la mémoire de valeurs string des éléments*/
+linkedlist_t cleanL(linkedlist_t list, int freeStr);
 
 /* Ajoute la list2 à la suite de la list1
  * Retourne la tête de la liste

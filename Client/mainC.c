@@ -12,6 +12,18 @@
 #include "../linkedlist.h"
 #include "../interpreter.h"
 
+
+/* /////////////////////////////////////////////////////////////////////////// 
+	TODO :
+		* Libérer la mémoire des noms de commande
+		* Libérer la mémoire des chaine représentants les arguments des commandes (Dans parser.c)
+	
+	
+/////////////////////////////////////////////////////////////////////////// */
+
+
+
+
 /* Main coté Client */
 int main(){
 	SOCKET sock;
@@ -20,11 +32,11 @@ int main(){
 	char* startMsg; // Permet de connaître la première adresse en mémoire du msg pour pouvoir la libérer par la suite
 	//char* responseForServ = NULL; // La réponse que l'on envoie au serveur
 	int initCo = 1; // Quand initCo == 1 il faut juste envoyer un header au serveur pour qu'il donne un id au client
-	char* responseForServ = "[\"Salutqsdfqsdfqsdfsqdt\"]";
+	char* responseForServ = NULL;
 	
 	linkedlist_t listResp = NULL; // La liste des réponses de commande 
 	command_t command = {NULL, NULL};
-	
+	int i;
 	
 	while(1){
 		sock = connectCli("127.0.0.1");
@@ -44,7 +56,7 @@ int main(){
 				exit(EXIT_FAILURE);
 			}
 			sendMessage(sock, "%s", responseForServ);
-			//free(responseForServ);
+			free(responseForServ);
 		}
 		// Dans les ca où il n'y a pas de réponse à envoyer, on attend des données du serveur
 		
@@ -53,9 +65,8 @@ int main(){
 			perror("Erreur dans la réception de l'entete");
 			exit(EXIT_FAILURE);
 		}
-		
+		message = NULL;
 		message = recvMessage(sock, header); // Reception du message
-		printf("Message : %s\n", message);
 		if(message == NULL){
 			perror("Erreur dans la reception du message.");
 			exit(EXIT_FAILURE);
@@ -66,17 +77,17 @@ int main(){
 		}
 		close(sock);
 		
-		
 		startMsg = message;
 		do{ // Récupère et interprète toutes les commandes
 			command = getCommand(&message);
 			listResp = performCommandCli(&command, listResp);
-			//command.args = cleanL(command.args); // Vide la liste d'arguments s'il en reste
+			command.args = cleanL(command.args, 0); // Vide la liste d'arguments s'il en reste
 		}while(command.name != NULL);
 		fflush(stdout);
 		
-		//responseForServ = formatResponse(&listResp);
-		free(startMsg);
+		responseForServ = formatResponse(&listResp);
+		
+		free(startMsg); //-------------------- Impossible de libérer la mémoire, cela provoque une erreur !!!!!
 	}
 	
 	return EXIT_SUCCESS;

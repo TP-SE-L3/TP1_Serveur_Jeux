@@ -18,8 +18,9 @@ command_t getCommand(char** str){
 	}
 	resStr += strlen(TAG_COMMAND);
 	// Le nom de la commande est ici, il faut juste couper la chaine au bon endroit
-	command.name = resStr; 
-	*str = substrpbrk(resStr, " ;\n");
+	*str = substrpbrk(resStr, " ;\n"); // Ajoute le \0 à la fin de la commande
+	command.name = malloc(strlen(resStr)+1);
+	strcpy(command.name, resStr); // Enregistre la commande
 	if(**str == '['){
 		*str += 1;
 		while(**str != ']' && **str != ';' && **str != '\0'){
@@ -37,18 +38,21 @@ command_t getCommand(char** str){
 			}
 		}
 	}
+	
 	return command;
 }
 
 // On utilise des doubles pointeurs car les adresses des chaines sont modifiées
-TypeArg_e recupArg(char** str, char** startArg){
+TypeArg_e recupArg(char** str, char** arg){
 	int i;
 	int ret = A_ERROR; // Valeur de retour
+	char* startArg = NULL;
+	
 	for(i=0; *(*(str)+i) == ' '; i++); // Supprime les espace devant s'il y en a
 	*str += i;
-	*startArg = *str; // Le début de l'agrgument
+	startArg = *str; // Le début de l'agrgument
 	if(**str == '"'){ // Le paramètre est une chaine
-		*startArg += 1; // Enlève les premiers guillemets
+		startArg += 1; // Enlève les premiers guillemets
 		*str = strchr(*str+1, '"');
 		ret = A_STRING;
 	}
@@ -64,6 +68,11 @@ TypeArg_e recupArg(char** str, char** startArg){
 		**str = '\0';
 		*str = *str+1;
 	}
+	if(startArg != NULL){
+		*arg = malloc(strlen(startArg) + 1);
+		strcpy(*arg, startArg);
+	}
+	
 	return ret;
 }
 
