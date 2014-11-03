@@ -20,6 +20,7 @@
 		* Faire la conversion de float dans recupe respCli
 		* Libérer la mémoire des args dans getRespCli
 		* Changer la fonction sendMessage
+		* Remplacer le tableau listGame par une liste chainée
 	
 /////////////////////////////////////////////////////////////////////////// */
 
@@ -33,9 +34,14 @@ int main(){
 		char message[256];
 		header_t header;
 		
+		
 		linkedlist_t respCli = NULL;
 		char* msgToSend;
 		int currentId = 1; // L'id que l'on attribut aux client (A chaque fois qu'il y a un nouveau client, il est incrémenté)
+		game_t listGames[SIZE_LIST_GAME];
+		int indiceListGame = 0;
+		
+		game_t test = {1,1,1,1,1};
 		
 		/*fd_set readfs;
 		FD_ZERO(&readfs);
@@ -72,7 +78,7 @@ int main(){
 			perror("Error Listen");
 			exit(EXIT_FAILURE);
 		}
-		
+		//listGames[0] = test;
 		
 		while(1){
 			sockCli = accept(sockServ, (struct sockaddr*)&addrServ, &lenAddrServ);
@@ -96,11 +102,11 @@ int main(){
 					exit(EXIT_FAILURE);
 				}
 				respCli = getRespCli(message); // Récupère les réponses client
-				
 				printf("Msg : %s et header.id : %d\n", message, header.id);
 			}
 			
-			msgToSend = gameManager(&header.idGame, header.id, respCli);
+			msgToSend = gameManager(&header.idGame, header.id, respCli, listGames, &indiceListGame);
+			respCli = cleanL(respCli, 1);
 			if(msgToSend != NULL){
 				header.size = strlen(msgToSend)+1;
 				sendHeader(sockCli, header);

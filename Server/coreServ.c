@@ -13,34 +13,86 @@
 #include "../parser.h"
 
 
-char* gameManager(int* idGame, int idCli, linkedlist_t args){
+char* gameManager(int* idGame, int idCli,linkedlist_t args, game_t listGames[SIZE_LIST_GAME], int* currentIndex){
 	//linkedlist_t listCommand = NULL;
 	
 	char* commands = NULL;
-	
+	int choix = 0;
 	
 	if(*idGame == -1){
-		int choix = 0;
 		if(!isEmptyL(args)){
 			element* el = popL(&args);
 			choix = (int)el->val;
 			switch(choix){
-				case 1:
-					outc(&commands, "%s", "Jeux 1\n");
+				case GAME_PENDU:
+					outc(&commands, "%s", "Pendu\n");
 				break;
-				case 2:
+				case GAME_MORPION:
+					outc(&commands, "%s", "Morpion\n");
+				break;
+				case CHOICE_EXIT:
 					outc(&commands, "%s", "Quitter\n");
 				break;
-				default: outc(&commands, "%s", "Choix incorrect...\n\n"); break;
+				default: 
+					outc(&commands, "%s", "Choix incorrect...\n\n"); 
+					choix = 0; 
+				break;
+			}
+			if(choix != 0 && choix != CHOICE_EXIT){
+				int i;
+				
+				for(i=0; i < *currentIndex; i++){
+					// On à trouvé une partie de libre
+					if(listGames[i].idTypeGame == choix && listGames[i].nbPlayer < 2){
+						*idGame = listGames[i].id;
+						listGames[i].nbPlayer++;
+						outc(&commands, "%s", "La partie peut commencer...\n");
+						// waitc(&commands, 50); // On attend pour le moment		
+						break;
+					}
+				}
+				
+				if(*idGame == -1){ // Si aucune partie disponible
+					game_t nwGame = {*currentIndex, choix, 1, 0, 0};
+					listGames[*currentIndex] = nwGame;
+					*currentIndex += 1;
+					*idGame = nwGame.id;
+					outc(&commands, "%s", "En attente d'un autre joueur.");
+					// waitc(&commands, 10);
+				}
 			}
 		}
+		////////////////////////////////////////////////////////////////////////
+		////							MENU								////
+		////////////////////////////////////////////////////////////////////////
 		if(choix == 0){
 			outc(&commands, "%s", "=================== MENU ===================\n");
-			outc(&commands, "%d %s", 1, ". Jeu 1\n");
-			outc(&commands, "%d %s", 2, ". Quitter\n");
+			outc(&commands, "%d %s", GAME_PENDU, ". Pendu\n");
+			outc(&commands, "%d %s", GAME_MORPION, ". Morpion\n");
+			outc(&commands, "%d %s", CHOICE_EXIT, ". Quitter\n");
 			inc(&commands, "%d");
 		}
 	}
+	else{ // Si idGame != -1 Càd si le joueur est déjà dans une partie
+		int i;
+		for(i=0; i < *currentIndex && listGames[i].id != *idGame; i++);
+		if(i == *currentIndex){
+			outc(&commands, "%s", "Erreur : Impossible de trouver la partie\n");
+			*idGame = -1;
+		}
+		else{
+			if(listGames[i].nbPlayer < 2){
+				outc(&commands, "%s", "."); // On attend toujours un autre joueur
+				// waitc(&commands, 10); 
+			}
+			else{
+				outc(&commands, "%s", "La partie peut commencer...\n");
+				// waitc(&commands, 50); // On attends pour le moment
+			}
+			
+		}
+	}
+	
 	
 	/*commands = listToStringL(listCommand);
 	listCommand = cleanL(listCommand, 1); // Vide la liste*/
@@ -71,7 +123,6 @@ linkedlist_t getRespCli(char* resp){
 			list = addHeadL(list, (void*)arg, STRING);
 		}
 		else if(resTypeArg == A_INT){ // Ajoute un nombre
-			printf("Nombre -> %d\n", atoi(arg));
 			list = addHeadL(list, (void*)atoi(arg), INT);
 		}
 		else{ // Ajoute un float
