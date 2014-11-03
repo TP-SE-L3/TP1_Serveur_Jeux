@@ -10,6 +10,7 @@
 #include "coreServ.h"
 #include "../linkedlist.h"
 #include "../utils.h"
+#include "../parser.h"
 
 
 char* gameManager(int* idGame, int idCli, linkedlist_t args){
@@ -19,18 +20,68 @@ char* gameManager(int* idGame, int idCli, linkedlist_t args){
 	
 	
 	if(*idGame == -1){
-		outc(&commands, "%s", "=================== MENU ===================\n");
-		outc(&commands, "%d %s", 1, ". Jeu 1\n");
-		outc(&commands, "%d %s", 2, ". Quitter\n");
-		inc(&commands, "%f");
+		int choix = 0;
+		if(!isEmptyL(args)){
+			element* el = popL(&args);
+			choix = (int)el->val;
+			switch(choix){
+				case 1:
+					outc(&commands, "%s", "Jeux 1\n");
+				break;
+				case 2:
+					outc(&commands, "%s", "Quitter\n");
+				break;
+				default: outc(&commands, "%s", "Choix incorrect...\n\n"); break;
+			}
+		}
+		if(choix == 0){
+			outc(&commands, "%s", "=================== MENU ===================\n");
+			outc(&commands, "%d %s", 1, ". Jeu 1\n");
+			outc(&commands, "%d %s", 2, ". Quitter\n");
+			inc(&commands, "%d");
+		}
 	}
-	
 	
 	/*commands = listToStringL(listCommand);
 	listCommand = cleanL(listCommand, 1); // Vide la liste*/
 	
 	return commands;
 }
+
+
+
+linkedlist_t getRespCli(char* resp){
+	linkedlist_t list = NULL;
+	char* str;
+	char* arg = NULL;
+	TypeArg_e resTypeArg;
+	
+	str = strchr(resp, '[');
+	if(str == NULL){
+		return NULL;
+	}
+
+	str += 1;
+	while(*str != ']' && *str != ';' && *str != '\0'){
+		resTypeArg = recupArg(&str, &arg);
+		if(resTypeArg == A_ERROR){ // Argument introuvable
+			break;
+		}
+		else if(resTypeArg == A_STRING){ // Ajoute une Chaine
+			list = addHeadL(list, (void*)arg, STRING);
+		}
+		else if(resTypeArg == A_INT){ // Ajoute un nombre
+			printf("Nombre -> %d\n", atoi(arg));
+			list = addHeadL(list, (void*)atoi(arg), INT);
+		}
+		else{ // Ajoute un float
+			printf("==> Float %s\n", arg);
+			//list = addHeadL(list, (void*)atoi(arg), INT);
+		}
+	}
+	return list;
+}
+
 
 
 void outc(char** listCommand, char* format, ...){
@@ -59,7 +110,6 @@ void outc(char** listCommand, char* format, ...){
 	}
 	nwFormat[j] = '\0';
 	strcat(nwFormat, "];\n");
-	printf("Format : %s", nwFormat);
 	
 	int taille = vsnprintf(NULL, 0, nwFormat, listArgs);
 	va_end(listArgs);

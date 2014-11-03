@@ -3,6 +3,15 @@
 
 #include "../linkedlist.h"
 
+typedef game_t game_t;
+struct game_t{
+	int id;
+	int pipeW;
+	int pipeR;
+};
+
+
+
 /* Permet de gérer les jeux en fonctions des demandes client
  * Retourne les commandes à envoyer au client sous forme d'une chaine de caractère
  * @param idGame: l'id du jeux actuellement joué (Peut être modifié)
@@ -10,6 +19,12 @@
  * @param args: les paramètre envoyés par le client (Réponses du client)
  * */
 char* gameManager(int* idGame, int idCli, linkedlist_t args);
+
+/* Converti un chaine en liste d'arguments
+ * Retourne une liste d'éléments récupérer dans la réponse client(char*)
+ * @param char* resp: La réponse du client*/
+linkedlist_t getRespCli(char* resp);
+
 
 
 void outc(char** listCommand, char* format, ...);

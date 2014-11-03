@@ -59,7 +59,6 @@ int sendMessage(SOCKET s, char* format, ...){
   vsnprintf(chaine, taille+1, format, listArgs);
   va_end(listArgs);
   i = 0;
-  printf("CHAINE %s et taille %d\n", chaine, taille);
   while (i < taille) { // attention, il ne faut pas envoyer le \0
     res = send(s, chaine+i, taille-i, MSG_NOSIGNAL);
     if(res<=0){

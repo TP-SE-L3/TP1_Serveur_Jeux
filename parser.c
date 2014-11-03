@@ -32,9 +32,13 @@ command_t getCommand(char** str){
 				//printf("Chaine : %s et str: %s\n", arg, *str);
 				command.args = addHeadL(command.args, (void*)arg, STRING);
 			}
-			else{ // Ajoute un nombre
-				//printf("Nombre : %d et str: %s\n", atoi(arg), *str);
+			else if(resTypeArg == A_INT){ // Ajoute une Chaine
+				//printf("Chaine : %s et str: %s\n", arg, *str);
 				command.args = addHeadL(command.args, (void*)atoi(arg), INT);
+			}
+			else{ // Ajoute un nombre
+				printf("Nombre : %s et str: %s\n", arg, *str);
+				//command.args = addHeadL(command.args, (void*)atoi(arg), INT);
 			}
 		}
 	}
@@ -68,6 +72,11 @@ TypeArg_e recupArg(char** str, char** arg){
 		**str = '\0';
 		*str = *str+1;
 	}
+	
+	if(ret == A_INT && strchr(startArg, '.') != NULL){ // Si on trouve un point, c'est un Float
+		ret = A_FLOAT;
+	}
+	
 	if(startArg != NULL){
 		*arg = malloc(strlen(startArg) + 1);
 		strcpy(*arg, startArg);

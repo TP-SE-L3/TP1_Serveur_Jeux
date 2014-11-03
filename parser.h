@@ -10,7 +10,8 @@
 typedef enum TypeArg_e{
 	A_ERROR,
 	A_STRING,
-	A_INT
+	A_INT,
+	A_FLOAT
 } TypeArg_e;
 
 

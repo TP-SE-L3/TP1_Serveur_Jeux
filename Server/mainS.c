@@ -15,6 +15,16 @@
 
 /* Main coté Serveur */
 
+/* /////////////////////////////////////////////////////////////////////////// 
+	TODO :
+		* Faire la conversion de float dans recupe respCli
+		* Libérer la mémoire des args dans getRespCli
+		* Changer la fonction sendMessage
+	
+/////////////////////////////////////////////////////////////////////////// */
+
+
+
 int main(){
 		SOCKET sockServ, sockCli;
 		struct sockaddr_in addrServ;
@@ -23,7 +33,7 @@ int main(){
 		char message[256];
 		header_t header;
 		
-		linkedlist_t respCli;
+		linkedlist_t respCli = NULL;
 		char* msgToSend;
 		int currentId = 1; // L'id que l'on attribut aux client (A chaque fois qu'il y a un nouveau client, il est incrémenté)
 		
@@ -63,6 +73,7 @@ int main(){
 			exit(EXIT_FAILURE);
 		}
 		
+		
 		while(1){
 			sockCli = accept(sockServ, (struct sockaddr*)&addrServ, &lenAddrServ);
 			if(sockCli == - 1){
@@ -84,17 +95,17 @@ int main(){
 					perror("Error recv");
 					exit(EXIT_FAILURE);
 				}
+				respCli = getRespCli(message); // Récupère les réponses client
+				
 				printf("Msg : %s et header.id : %d\n", message, header.id);
 			}
 			
-			respCli = NULL;
 			msgToSend = gameManager(&header.idGame, header.id, respCli);
-			printf("Msg to send : %s  et len : %d\n", msgToSend, strlen(msgToSend));
 			if(msgToSend != NULL){
 				header.size = strlen(msgToSend)+1;
 				sendHeader(sockCli, header);
 				sendMessage(sockCli, "%s", msgToSend);
-				//free(msgToSend);
+				free(msgToSend);
 			}
 			
 			
