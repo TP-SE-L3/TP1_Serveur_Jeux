@@ -17,10 +17,9 @@
 
 /* /////////////////////////////////////////////////////////////////////////// 
 	TODO :
-		* Faire la conversion de float dans recupe respCli
-		* Libérer la mémoire des args dans getRespCli
-		* Changer la fonction sendMessage
-		* Remplacer le tableau listGame par une liste chainée
+		* Commande pour éffacer la console
+		* Utiliser les fonctions : ConnectServ et ConnnectCli
+		* Penser à vider la mémoire, de la liste chainée, une fois qu'une partie se termine
 	
 /////////////////////////////////////////////////////////////////////////// */
 
@@ -34,19 +33,13 @@ int main(){
 		char* message;
 		header_t header;
 		
-		
 		linkedlist_t respCli = NULL;
 		char* msgToSend;
 		int currentId = 1; // L'id que l'on attribut aux client (A chaque fois qu'il y a un nouveau client, il est incrémenté)
-		game_t listGames[SIZE_LIST_GAME];
+		linkedlist_t listGames = NULL;
+		//game_t listGames[SIZE_LIST_GAME];
 		int indiceListGame = 0;
 		
-		
-		/*fd_set readfs;
-		FD_ZERO(&readfs);
-		struct timeval timeout;
-		timeout.tv_sec = 20;
-		timeout.tv_usec = 0;*/
 		
 		sockServ = socket(AF_INET, SOCK_STREAM, 0);
 		if(sockServ == -1){ 
@@ -70,35 +63,42 @@ int main(){
 				exit(EXIT_FAILURE);
 		}
 		
-		/*FD_SET(sockServ, &readfs);
-		res = select(sockServ+1, &readfs, NULL, NULL, &timeout);*/
 					
 		if(listen(sockServ, 1) == -1){
 			perror("Error Listen");
 			exit(EXIT_FAILURE);
 		}
-		
+		printf(" Le serveur est en marche.\n\n");
 		while(1){
 			sockCli = accept(sockServ, (struct sockaddr*)&addrServ, &lenAddrServ);
 			if(sockCli == - 1){
 				perror("Error Accept");
 			}
-			printf("-> Client sur le socket : %d\n", (int)sockCli);
 			
 			if(recvHeader(sockCli, &header) == -1){
 				perror("Erreur dans la réception de l'entete d'un client");
 				exit(EXIT_FAILURE);
 			}
-			//printf("Header : %d S:%d\n", header.id, header.size);
+			// Nouveau client
 			if(header.id == -1){ // Le client n'a pas encore d'ID, il faut lui en attribuer un
 				header.id = currentId;
 				currentId++;
+				printf(" [ID:NvCli(%d) | Socket:%d | Partie:Aucune]\n", header.id, (int)sockCli);
 			}
-			else if(header.size != -1){ // Si -1, aucun msg à recevoir
+			else{
+				printf(" [ID:%d | Socket:%d | Partie:", header.id, (int)sockCli);
+				if(header.idGame == -1){
+					printf("Aucune]\n");
+				}
+				else{
+					printf("%d]\n", header.idGame);
+				}
+			}
+			// Si le client envoie un message
+			if(header.size != -1){ // Si -1, aucun msg à recevoir
 				message = malloc(header.size);
 				int res = recv(sockCli, message, header.size, 0);
 				message[header.size-1] = '\0'; // Met le caractère '\0' en fin de chaine
-				printf("Msg : %s et header.id : %d\n", message, header.id);
 				if(res != header.size-1){
 					perror("Erreur de reception");
 					exit(EXIT_FAILURE);
@@ -113,14 +113,14 @@ int main(){
 				free(message);
 			}
 			
-			msgToSend = gameManager(&header.idGame, header.id, respCli, listGames, &indiceListGame);
+			msgToSend = gameManager(&header.idGame, header.id, respCli, &listGames, &indiceListGame);
 			respCli = cleanL(respCli, 0);
 			header.size = ((msgToSend == NULL)? (-1) : (signed int)strlen(msgToSend));
 			sendHeader(sockCli, header);
 			
 			if(msgToSend != NULL){
 				header.size = strlen(msgToSend)+1;
-				sendMessage(sockCli, "%s", msgToSend);
+				sendMessage(sockCli, msgToSend);
 				free(msgToSend);
 				msgToSend = NULL;
 			}

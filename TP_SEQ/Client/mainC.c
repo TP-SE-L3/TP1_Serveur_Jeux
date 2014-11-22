@@ -15,10 +15,7 @@
 
 /* /////////////////////////////////////////////////////////////////////////// 
 	TODO :
-		* Libérer la mémoire des noms de commande
-		* Libérer la mémoire des chaine représentants les arguments des commandes (Dans parser.c)
-	
-	
+		
 /////////////////////////////////////////////////////////////////////////// */
 
 
@@ -40,14 +37,15 @@ int main(){
 	while(1){
 		sock = connectCli("127.0.0.1");
 		
-		printf("resp : %s\n", responseForServ);
-		if(initCo == 1){ // On veut initialiser la connexion
+		// On veut initialiser la connexion
+		if(initCo == 1){ 
 			if(sendHeader(sock, header) == -1){
 				perror("Erreur dans l'envoi de l'entete au serveur");
 				exit(EXIT_FAILURE);
 			}
-			printf("Connexion serveur OK\n");
+			printf("Vous etes connecte au serveur.\n");
 			initCo = 0; // La connexion est initialisé, le serveur va envoyer les données
+			sleep(1);
 		}
 		else if(responseForServ != NULL){
 			header.size = strlen(responseForServ)+1;
@@ -55,7 +53,7 @@ int main(){
 				perror("Erreur dans l'envoi de l'entete au serveur");
 				exit(EXIT_FAILURE);
 			}
-			sendMessage(sock, "%s", responseForServ);
+			sendMessage(sock, responseForServ);
 			free(responseForServ);
 		}
 		else{ // Aucune réponse à envoyer au serveur
@@ -92,9 +90,9 @@ int main(){
 			fflush(stdout);
 			
 			responseForServ = formatResponse(&listResp);
-			free(startMsg); //-------------------- Impossible de libérer la mémoire, cela provoque une erreur !!!!!
+			free(startMsg);
 			if(responseForServ == NULL){
-				sleep(2); // Quand on a pas de réponse, on attend 2 secondes
+				sleep(1); // Quand on a pas de réponse, on attend 1 secondes
 			}
 		}
 		else{ // Quand le serveur n'a pas envoyé de messsage
@@ -103,7 +101,7 @@ int main(){
 				exit(EXIT_FAILURE);
 			}
 			close(sock);
-			sleep(4);
+			//sleep(2); // On attend un petit moment
 		}
 	}
 	

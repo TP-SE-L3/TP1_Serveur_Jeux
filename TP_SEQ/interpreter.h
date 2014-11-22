@@ -9,7 +9,6 @@
 linkedlist_t performCommandCli(command_t *command, linkedlist_t listResp);
 
 
-
 /*---- On utilise l'adresse de args, car en utilisant popL, si la liste devient vide
  * --- Notre liste doit avoir un pointer vide et non pointer sur un élément qui vient d'être libéré*/
 
@@ -26,4 +25,6 @@ linkedlist_t performIn(linkedlist_t* args, linkedlist_t listResp);
 /*Peremet d'interpréter la command wait (attendre un nombre de n secondes)*/
 void performWait(linkedlist_t *args);
 
+/*Peremt d'interpréter des commande système (pour le clear de la console)*/
+void performSyst(linkedlist_t *args);
 #endif

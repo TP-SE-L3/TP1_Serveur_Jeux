@@ -11,15 +11,15 @@
 #include "../linkedlist.h"
 #include "../utils.h"
 #include "../parser.h"
+#include "../commands.h"
 
 
-char* gameManager(int* idGame, int idCli,linkedlist_t args, game_t listGames[SIZE_LIST_GAME], int* currentIndex){
+char* gameManager(int* idGame, int idCli,linkedlist_t args, linkedlist_t* listGames, int* currentIndex){
 	//linkedlist_t listCommand = NULL;
-	printf("---------------------\n");
 	
 	char* commands = NULL;
 	int choix = 0;
-	
+	printf("List game size %d\n", sizeL(*listGames));
 	
 	if(*idGame == -1){
 		if(!isEmptyL(args)){
@@ -37,30 +37,40 @@ char* gameManager(int* idGame, int idCli,linkedlist_t args, game_t listGames[SIZ
 				break;
 				default: 
 					outc(&commands, "%s", "Choix incorrect...\n\n"); 
+					waitc(&commands, 1);
 					choix = 0; 
 				break;
 			}
 			if(choix != 0 && choix != CHOICE_EXIT){
-				int i;
-				
-				for(i=0; i < *currentIndex; i++){
-					// On à trouvé une partie de libre
-					if(listGames[i].idTypeGame == choix && listGames[i].nbPlayer < 2){
-						*idGame = listGames[i].id;
-						listGames[i].nbPlayer++;
+				element* el;
+				for(el = *listGames; el != NULL; el = el->next){
+					
+					game_t* curGame = (game_t*)el->val;
+					printf("Type G : %d\n", curGame->idTypeGame);
+					if(curGame->idTypeGame == choix && curGame->nbPlayer < 2){
+						
+						*idGame = curGame->id;
+						curGame->nbPlayer++;
 						outc(&commands, "%s", "La partie peut commencer...\n");
-						waitc(&commands, 10); // On attend pour le moment		
+						waitc(&commands, 15); // On attend pour le moment		
 						break;
 					}
 				}
 				
-				if(*idGame == -1){ // Si aucune partie disponible
-					game_t nwGame = {*currentIndex, choix, 1, 0, 0};
-					listGames[*currentIndex] = nwGame;
+				
+				if(*idGame == -1){
+					game_t *nwGameP = malloc(sizeof(game_t)); // Le pointeur à enregistrer dans la liste
+					nwGameP->id = *currentIndex;
+					nwGameP->idTypeGame = choix;
+					nwGameP->nbPlayer = 1;
+					nwGameP->pipeW = 0;
+					nwGameP->pipeR = 0;
+					printf("Type nwGame : %d\n", nwGameP->idTypeGame);
+					*listGames = addHeadL(*listGames, nwGameP, OTHER);
 					*currentIndex += 1;
-					*idGame = nwGame.id;
+					*idGame = nwGameP->id;
 					outc(&commands, "%s", "En attente d'un autre joueur.\n");
-					waitc(&commands, 10);
+					waitc(&commands, 5);
 				}
 			}
 		}
@@ -68,7 +78,7 @@ char* gameManager(int* idGame, int idCli,linkedlist_t args, game_t listGames[SIZ
 		////							MENU								////
 		////////////////////////////////////////////////////////////////////////
 		if(choix == 0){
-			waitc(&commands, 1);
+			systemc(&commands, "clear");
 			outc(&commands, "%s", "=================== MENU ===================\n");
 			outc(&commands, "%d %s", GAME_PENDU, ". Pendu\n");
 			outc(&commands, "%d %s", GAME_MORPION, ". Morpion\n");
@@ -77,22 +87,30 @@ char* gameManager(int* idGame, int idCli,linkedlist_t args, game_t listGames[SIZ
 		}
 	}
 	else{ // Si idGame != -1 Càd si le joueur est déjà dans une partie
-		int i;
-		for(i=0; i < *currentIndex && listGames[i].id != *idGame; i++);
-		if(i == *currentIndex){
+		////////////////////////////////////////////////////////////////////////
+		////					Parties en cours (ou attente)				////
+		////////////////////////////////////////////////////////////////////////
+		element* el;
+		game_t curGame;
+		for(el = *listGames; el != NULL; el = el->next){
+			curGame = *(game_t*)el->val;
+			if(curGame.id == *idGame){
+				break;
+			}
+		}
+		if(el == NULL){
 			outc(&commands, "%s", "Erreur : Impossible de trouver la partie.\n");
 			*idGame = -1;
 		}
 		else{
-			if(listGames[i].nbPlayer < 2){
+			if(curGame.nbPlayer < 2){
 				outc(&commands, "%s", "."); // On attend toujours un autre joueur
-				waitc(&commands, 10);
+				waitc(&commands, 5);
 			}
 			else{
 				outc(&commands, "%s", "La partie peut commencer...\n");
-				waitc(&commands, 30); // On attends pour le moment
+				waitc(&commands, 15); // On attends pour le moment
 			}
-			
 		}
 	}
 	
@@ -127,159 +145,14 @@ linkedlist_t getRespCli(char* resp){
 		}
 		else if(resTypeArg == A_INT){ // Ajoute un nombre
 			list = addHeadL(list, (void*)atoi(arg), INT);
+			free(arg);
 		}
 		else{ // Ajoute un float
-			printf("==> Float %s\n", arg);
-			//list = addHeadL(list, (void*)atoi(arg), INT);
+			float* respFloat = malloc(sizeof(float));
+			*respFloat = (float)atof(arg);
+			list = addHeadL(list, respFloat, FLOAT);
+			free(arg);
 		}
 	}
 	return list;
 }
-
-
-
-void outc(char** listCommand, char* format, ...){
-	int i, j;
-	// nwFormat : Rajoute des éléments pour que la commande soit valide
-	char* nwListCommand = NULL;
-	char* command = NULL;
-	char nwFormat[strlen(format) + (nbstr(format, "%s")*2) + 13]; // *2 la place pour le "" entre les chaines, +10 pour Pour "cmd:out [" et "]; " et '\0'
-	int sizeListCmd = (*listCommand == NULL)? 0 : strlen(*listCommand);
-	
-	va_list listArgs;
-	va_start(listArgs, format);
-	strcpy(nwFormat, "cmd:out [");
-	for(i=0, j=strlen(nwFormat); format[i] != '\0'; i++){ // Rajoute les "" pour les chaines
-		if(*(format+i) == '%' && *(format+i+1) == 's'){
-			nwFormat[j++] = '"';
-			nwFormat[j++] = '%';
-			nwFormat[j++] = 's';
-			nwFormat[j++] = '"';
-			i++;
-		}
-		else{
-			nwFormat[j] = format[i];
-			j++;
-		}
-	}
-	nwFormat[j] = '\0';
-	strcat(nwFormat, "];\n");
-	
-	int taille = vsnprintf(NULL, 0, nwFormat, listArgs);
-	va_end(listArgs);
-	
-	command = malloc(taille+1); // +1 pour \0
-	
-	va_start(listArgs, format);
-	vsnprintf(command, taille+1, nwFormat, listArgs);
-	va_end(listArgs);
-	nwListCommand = malloc(taille + sizeListCmd + 1);
-	if(*listCommand != NULL){
-		strcpy(nwListCommand, *listCommand);
-		free(*listCommand);
-	}
-	else{
-		*nwListCommand = '\0';
-	}
-	strcat(nwListCommand, command);
-	*listCommand = nwListCommand;
-}
-
-
-void inc(char** listCommand, char* format){ 
-	char* command = malloc(16); // 16 : Pour écrire cmd:in ["%n"];\n\0"
-	char* tmpStr;
-	char* nwListCommand = NULL;
-	int sizeListCmd = (*listCommand == NULL)? 0 : strlen(*listCommand);
-	strcpy(command, "cmd:in [\"%?"); // Le ? va être remplacé
-	tmpStr = strchr(format, '%');
-	command[strlen(command)-1] = *(tmpStr+1);
-	strcat(command, "\"];\n");
-	command[15] = '\0';
-	
-	nwListCommand = malloc(15 + sizeListCmd + 1);
-	
-	if(*listCommand != NULL){
-		strcpy(nwListCommand, *listCommand);
-		free(*listCommand);
-	}
-	else{
-		*nwListCommand = '\0';
-	}
-	strcat(nwListCommand, command);
-	*listCommand = nwListCommand;
-}
-
-
-
-void waitc(char** listCommand, int time){
-	char* nwListCommand = NULL;
-	int sizeListCmd = (*listCommand == NULL)? 0 : strlen(*listCommand);
-	char timeToStr[10];
-	sprintf(timeToStr, "%d", time);
-	char* command = malloc(14 + strlen(timeToStr)); // 16 : Pour écrire cmd:wait ["%n"];\n\0"
-	
-	sprintf(command, "cmd:wait [%s];\n", timeToStr);
-	
-	nwListCommand = malloc(strlen(command) + sizeListCmd + 1);
-	
-	if(*listCommand != NULL){
-		strcpy(nwListCommand, *listCommand);
-		free(*listCommand);
-	}
-	else{
-		*nwListCommand = '\0';
-	}
-	strcat(nwListCommand, command);
-	*listCommand = nwListCommand;
-}
-
-
-//~ void outc2(linkedlist_t *listCommand, char* format, ...){
-	//~ int i, j;
-	//~ // nwFormat : Rajoute des éléments pour que la commande soit valide
-	//~ char nwFormat[strlen(format) + (nbstr(format, "%s")*2) + 13]; // *2 la place pour le "" entre les chaines, +10 pour Pour "cmd:out [" et "]; " et '\0'
-	//~ char* command = NULL;
-	//~ va_list listArgs;
-	//~ va_start(listArgs, format);
-	//~ strcpy(nwFormat, "cmd:out [");
-	//~ for(i=0, j=strlen(nwFormat); format[i] != '\0'; i++){ // Rajoute les "" pour les chaines
-		//~ if(*(format+i) == '%' && *(format+i+1) == 's'){
-			//~ nwFormat[j++] = '"';
-			//~ nwFormat[j++] = '%';
-			//~ nwFormat[j++] = 's';
-			//~ nwFormat[j++] = '"';
-			//~ i++;
-		//~ }
-		//~ else{
-			//~ nwFormat[j] = format[i];
-			//~ j++;
-		//~ }
-	//~ }
-	//~ nwFormat[j] = '\0';
-	//~ strcat(nwFormat, "];\n");
-	//~ printf("Format : %s", nwFormat);
-	//~ 
-	//~ int taille = vsnprintf(NULL, 0, nwFormat, listArgs);
-	//~ va_end(listArgs);
-	//~ 
-	//~ command = malloc(taille+1); // +1 pour \0
-	//~ 
-	//~ va_start(listArgs, format);
-	//~ vsnprintf(command, taille+1, nwFormat, listArgs);
-	//~ va_end(listArgs);
-	//~ *listCommand = addQueueL(*listCommand, (void*)command, STRING); // ajoute la comande à la liste
-//~ }
-//~ 
-//~ void inc2(linkedlist_t *listCommand, char* format){ 
-	//~ char* command = malloc(16); // 16 : Pour écrire cmd:in ["%n"];\n\0"
-	//~ char* tmpStr;
-	//~ strcpy(command, "cmd:in [\"%?"); // Le ? va être remplacé
-	//~ tmpStr = strchr(format, '%');
-	//~ command[strlen(command)-1] = *(tmpStr+1);
-	//~ strcat(command, "\"];\n");
-	//~ command[15] = '\0';
-	//~ 
-	//~ printf("IN COMMAND MI -> %s  len: %d\n", command, strlen(command));
-	//~ *listCommand = addQueueL(*listCommand, (void*)command, STRING); // ajoute la comande à la liste
-//~ }

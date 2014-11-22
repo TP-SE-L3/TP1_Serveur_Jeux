@@ -36,9 +36,11 @@ command_t getCommand(char** str){
 				//printf("Chaine : %s et str: %s\n", arg, *str);
 				command.args = addHeadL(command.args, (void*)atoi(arg), INT);
 			}
-			else{ // Ajoute un nombre
-				printf("Nombre : %s et str: %s\n", arg, *str);
-				//command.args = addHeadL(command.args, (void*)atoi(arg), INT);
+			else if(resTypeArg == A_FLOAT){ // Ajoute un float (A vérifier)
+				float* resFloat = malloc(sizeof(float));
+				*resFloat = (float)atof(arg);
+				command.args = addHeadL(command.args, resFloat, FLOAT);
+				//printf("Nombre : %s et str: %s\n", arg, *str);
 			}
 		}
 	}

@@ -4,7 +4,8 @@
 typedef enum Type_e{
 	INT,
 	FLOAT,
-	STRING
+	STRING,
+	OTHER // N'importe quel type : il faut que le programmeur sache ce qu'il y a dedans
 } Type_e;
 
 

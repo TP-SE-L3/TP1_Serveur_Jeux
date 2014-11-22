@@ -39,30 +39,14 @@ SOCKET connectCli(const char* servIP){
 }
 
 
-int sendMessage(SOCKET s, char* format, ...){
-  int i;
+int sendMessage(SOCKET s, char* message){
   int res;
-
-  va_list listArgs;
-  va_start(listArgs, format);
- 
-  
-  // on calcul la taille du message
-  int taille = vsnprintf(NULL, 0, format, listArgs);
-  va_end(listArgs);
-
-
-  // un tableau un peu plus grand pour le \0
-  char chaine[taille+1];
-
-  va_start(listArgs, format);
-  vsnprintf(chaine, taille+1, format, listArgs);
-  va_end(listArgs);
-  i = 0;
-  while (i < taille) { // attention, il ne faut pas envoyer le \0
-    res = send(s, chaine+i, taille-i, MSG_NOSIGNAL);
+  int i=0;
+  int sizeMsg = strlen(message);
+  while (i < sizeMsg) { // attention, il ne faut pas envoyer le \0
+    res = send(s, message+i, sizeMsg-i, MSG_NOSIGNAL);
     if(res<=0){
-      fprintf(stderr, "error: write %s car %s\n", chaine, strerror(errno));
+      fprintf(stderr, "error: write %s car %s\n", message, strerror(errno));
       return -1;
     }
     i += res;
@@ -79,9 +63,7 @@ int sendHeader(SOCKET sock, header_t header){
 		message[i] = ' '; // On remplit la fin de chaine avec des espaces
 	}
 	message[SIZE_HEADER] = '\0';
-	printf("Header send : %s\n", message);
-	fflush(stdout);
-	return sendMessage(sock, "%s", message); // Ici la va_list ne sert à rien
+	return sendMessage(sock, message); // Ici la va_list ne sert à rien
 }
 
 
@@ -94,7 +76,7 @@ int recvHeader(SOCKET sock, header_t* header){
 	/**
 	 * Améliorer la fonction de reception ----------------------- TODO
 	 * */
-	if(recv(sock, message, sizeof(message), 0) == -1){
+	if(recv(sock, message, SIZE_HEADER, MSG_WAITALL) == -1){
 		perror("Error recv");
 		return -1;
 	}
@@ -130,8 +112,7 @@ int recvHeader(SOCKET sock, header_t* header){
 
 char* recvMessage(SOCKET sock, header_t header){
 	char* message = malloc(header.size+1 * sizeof(char));
-	
-	if(recv(sock, message, header.size, 0) == -1){
+	if(recv(sock, message, header.size, MSG_WAITALL) == -1){
 		perror("Error recv");
 		return NULL;
 	}
