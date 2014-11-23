@@ -1,17 +1,16 @@
 CC = gcc
 CFLAGS = -W -Wall
-LDFLAGS = -lpthread
-EXEC = Server
-SRC = $(wildcard *.c ../*.c)
-INCLUDES = $(wildcard *.h ../*.h)
+EXEC = Pendu
+SRC = $(wildcard *.c ../../*.c)
+INCLUDES = $(wildcard *.h ../../*.h)
 OBJ = $(SRC:.c=.o)
 
 all: $(EXEC)
 
-$(EXEC): mainS.o $(OBJ)
-	$(CC) $(CFLAGS) -o $(EXEC) $(OBJ) $(INCLUDES) $(LDFLAGS)
+$(EXEC): main.o $(OBJ)
+	$(CC) $(CFLAGS) -o $(EXEC) $(OBJ) $(INCLUDES)
 
-mainS.o: mainS.c
+main.o: main.c
 	$(CC) $(CFLAGS) -c $^
 
 

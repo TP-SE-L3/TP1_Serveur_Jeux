@@ -11,7 +11,6 @@ linkedlist_t performCommandCli(command_t *command, linkedlist_t listResp){
 	if(command->name == NULL){
 		return listResp;
 	}
-	
 	if(strcmp(command->name, "out") == 0){
 		performOut(&command->args);
 	}
@@ -20,6 +19,9 @@ linkedlist_t performCommandCli(command_t *command, linkedlist_t listResp){
 	}
 	else if(strcmp(command->name, "wait") == 0){ // Attend pendant un certain temps
 		performWait(&command->args);
+	}
+	else if(strcmp(command->name, "system") == 0){
+		performSyst(&command->args);
 	}
 	return listResp;
 }
@@ -32,6 +34,7 @@ void performOut(linkedlist_t *args){
 		el = popL(args);
 		if(el->type == STRING){
 			printf("%s", (char*)el->val);
+			free(el->val); // Libère la mémoire quand on à une chaine
 		}
 		else if(el->type == INT){
 			printf("%d", (int)el->val);
@@ -44,7 +47,7 @@ void performOut(linkedlist_t *args){
 linkedlist_t performIn(linkedlist_t *args, linkedlist_t listResp){
 	element* el = NULL;
 	char* val;
-	int size = 10; // Si le scanf est une chaine, on défini la taille chaine entrée
+	int size = 25; // Si le scanf est une chaine, on défini la taille chaine entrée
 	int resInt;
 	char* resChar = NULL;
 	float* resFloat = NULL;
@@ -53,14 +56,20 @@ linkedlist_t performIn(linkedlist_t *args, linkedlist_t listResp){
 		el = popL(args);
 		if(el->type == STRING){
 			val = (char*)el->val;
+			free(el);
 			if(strcmp(val, "%s") == 0){ // STRING
 				el = popL(args);
 				if(el != NULL && el->type == INT){ // Dans le cas d'une chaine, il faut allouer de la mémoire
 					size = (int)el->val;
 				}
 				resChar = malloc(size * sizeof(char)); // Il faudra libérer la mémoire après
-				scanf("%s", resChar);
+				char regexSc[7]; // Permet de sécuriser le scanf sur la taille
+				sprintf(regexSc, "-%ds", size);
+				regexSc[0] = '%';
+
+				scanf(regexSc, resChar);
 				listResp = addHeadL(listResp, (void*)resChar, STRING);
+				free(el);
 			}
 			else if(strcmp(val, "%d") == 0){ // INT
 				scanf("%d", &resInt);
@@ -71,6 +80,7 @@ linkedlist_t performIn(linkedlist_t *args, linkedlist_t listResp){
 				scanf("%f", resFloat);
 				listResp = addHeadL(listResp, resFloat, FLOAT);
 			}
+			free(val);
 		}
 	}
 	return listResp;
@@ -83,5 +93,22 @@ void performWait(linkedlist_t *args){
 		if(el->type == INT){
 			sleep((int)el->val); // On attend le nombre de secondes données par le client
 		}
+		free(el);
+	}
+}
+
+void performSyst(linkedlist_t *args){
+	element* el = NULL;
+	char* val;
+	if(!isEmptyL(*args)){
+		el = popL(args);
+		if(el->type == STRING){
+			val = (char*)el->val;
+			if(strcmp("clear", val) == 0){
+				system("clear");
+			}
+			free(val); // Libère la chaine
+		}
+		free(el);
 	}
 }

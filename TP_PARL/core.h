@@ -62,7 +62,7 @@ SOCKET connectCli(const char* servIP);
 
 SOCKET CreeConnectSocketClient(const char *nom_serveur, const char* port);
 
-int sendMessage(SOCKET s, char* format, ...);
+int sendMessage(SOCKET s, char* message);
 
 int sendHeader(SOCKET sock, header_t header);
 

@@ -17,6 +17,7 @@ int stroc(char* str1, char* str2){
 }
 
 char* strbtw(char* str, char start, char end){
+	// i : indice start, j : indice end, k : permet de copier la chaine entre start et end
 	int i, j, k;
 	char* nwStr;
 	for(i=0; *(str+i) != '\0' && *(str+i) != start; i++);
@@ -24,10 +25,11 @@ char* strbtw(char* str, char start, char end){
 		i++; // On va plus loin que start
 		for(j=i; *(str+j) != '\0' && *(str+j) != end; j++);
 		nwStr = malloc((j-i+1) * sizeof(char));
+		
 		for(k=i; k < j; k++){// On ne prend pas le caractère end (position j)
 			*(nwStr+(k-i)) = *(str+k);
 		}
-		*(nwStr+k) = '\0';
+		*(nwStr+(k-i)) = '\0';
 		return nwStr;
 	}
 	return NULL;
