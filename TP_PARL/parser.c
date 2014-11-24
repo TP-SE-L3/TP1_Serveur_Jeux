@@ -6,6 +6,8 @@
 #include "parser.h"
 #include "linkedlist.h"
 
+
+
 command_t getCommand(char** str){
 	char* resStr;
 	char* arg = NULL;
@@ -148,4 +150,44 @@ char* formatResponse(linkedlist_t* listResp){
 	//printf("StrResp : %s et len : %d\n", strResp, strlen(strResp));
 	
 	return strResp;
+}
+
+
+headerPipe_t getHeaderPipe(char* message){
+	headerPipe_t header;
+	char* strCurrent; // Chaine qui va être modifée, petit à petit pour récupérer les bon éléments
+	char* startStrCurrent; // Le pointeur de départ de strCurrent, pour libérer la mémoire à la fin
+	char* idStr, *sizeStr;
+	char* resStr; // Tmp variable de résultat
+	
+	
+	// Revoir le nom des variables
+	// Les paramètres doivent être dans le bon ordre (1:ID, 2:SIZE)
+	strCurrent = strbtw(message, '[', ']');
+	startStrCurrent = strCurrent;
+	resStr = strstr(strCurrent, "PL:"); // Récupère l'id du joueur
+	
+	if(resStr != NULL){
+		strCurrent = resStr;
+		idStr = strCurrent+strlen("PL:");
+		strCurrent = substrpbrk(idStr, " \0");
+		header.numPlayer = atoi(idStr); // Peut utiliser strtol, avec gestion d'erreur
+	}
+	resStr = strstr(strCurrent, "RP:"); // Récupère l'id du jeu
+	if(resStr != NULL){
+		strCurrent = resStr;
+		idStr = strCurrent+strlen("RP:");
+		strCurrent = substrpbrk(idStr, " \0");
+		header.waitRep = atoi(idStr); // Peut utiliser strtol, avec gestion d'erreur
+	}
+	
+	resStr = strstr(strCurrent, "SIZE:"); // La taille du message suivant
+	if(strCurrent != NULL){
+		strCurrent = resStr;
+		sizeStr = strCurrent+strlen("SIZE:");
+		strCurrent = substrpbrk(sizeStr, " \0");
+		header.size = atoi(sizeStr);
+	}
+	//free(startStrCurrent);
+	return header;
 }

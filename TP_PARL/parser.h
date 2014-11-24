@@ -4,6 +4,7 @@
 
 #define TAG_COMMAND "cmd:"
 
+#define HEADER_PIPE_SIZE 25
 
 // Les types que peut retourner la fonction recupArg
 
@@ -19,6 +20,13 @@ typedef struct command_t command_t;
 struct command_t{
 	char* name;
 	linkedlist_t args;
+};
+
+typedef struct headerPipe_t headerPipe_t;
+struct headerPipe_t{
+	int numPlayer;
+	int size;
+	int waitRep; // si le serveur doit attendre une réponse
 };
 
 
@@ -42,4 +50,7 @@ TypeArg_e recupArg(char** str, char** arg);
  * Retourne une chaine contenant les éléments de réponse (Attention il faudra vider la mémoire)
  * @param listResp: Liste chainée contenant toutes le éléments de réponse*/
 char* formatResponse(linkedlist_t* listResp);
+
+
+headerPipe_t getHeaderPipe(char* message);
 #endif

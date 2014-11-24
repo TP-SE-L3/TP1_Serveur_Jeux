@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "../../comands.h"
+#include "../../parser.h"
 
 #ifndef TRUE
 	#define TRUE 1
@@ -18,7 +19,6 @@ void close_out_players(char* tabPl[], int nbPlayers);
 void flushc(int fd, char* tabPl[], int nbPlayers);
 
 #define NB_PLAYER 2
-#define HEADER_PIPE_SIZE 25
 
 int main(int argc, char** argv){
 	char* outputPl[NB_PLAYER] = {NULL, NULL};
@@ -42,6 +42,7 @@ int main(int argc, char** argv){
 	flushc(fd, outputPl, NB_PLAYER);
 	
 	
+	sleep(10);
 	
 	close(fd);
 	close_out_players(outputPl, NB_PLAYER);

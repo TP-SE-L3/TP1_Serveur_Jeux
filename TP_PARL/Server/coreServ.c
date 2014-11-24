@@ -14,6 +14,7 @@
 #include "../parser.h"
 #include "../comands.h"
 #include "../core.h"
+#include "../parser.h"
 
 
 char* gameManager(int* idGame, player_t client, linkedlist_t args, linkedlist_t* listGames, int* currentIndex){
@@ -170,12 +171,11 @@ linkedlist_t getRespCli(char* resp){
 
 
 void* playGame(void* arg){
-	//char* message;
+	char* message = NULL;
 	header_t header = {-1, -1, -1};
-	
 	//~ linkedlist_t respCli = NULL;
-	char* msgToSend = NULL;
 	game_t* game = (game_t*)arg;
+	headerPipe_t headerPipe[2]; // ----- Demander d'où vient le prblème si headerPipe n'est pas initilisé avant le fork
 	pid_t pid;
 	
 	if(pipe(game->pipeRW) == -1){
@@ -196,30 +196,83 @@ void* playGame(void* arg){
 		printf("Pipe : %d\n", game->pipeRW[1]);
 		
 		execvp("Games/Pendu", argList);
-		printf("Errorrrrrrrrrrrrr");
+		printf("Erreur impossible de lancer le jeu.\n");
+		exit(EXIT_FAILURE);
 	}
 	else{
 		close(game->pipeRW[1]); // Ferme l'écriture
-		char headerPipe[26];
-		read(game->pipeRW[0], headerPipe, 25);
-		headerPipe[25] = '\0';
-		char cmdPipe[37];
-		read(game->pipeRW[0], cmdPipe, 36);
-		cmdPipe[36] = '\0';
-		printf("Msg pipe : %s\n", cmdPipe); 
+		char headerPipeStr[HEADER_PIPE_SIZE+1];
+		char* msgToSend = NULL; // Récupère les commandes clients dans le pipe
+		int i;
+		
+		header.idGame = game->id;
 		
 		
+		////////////////////////////////////////////////////////////////////////
+		////							ENVOIES CLIENTS						////
+		////////////////////////////////////////////////////////////////////////
+		// i n'est pas forcément le numéro du joueur, le numéro du joueur est dans headerPipe
+		// On envoie toutes les commandes qu'il faut envoyer à chaque client
+		for(i = 0; i < game->nbPlayer; i++){ 
+			read(game->pipeRW[0], headerPipeStr, HEADER_PIPE_SIZE);
+			headerPipeStr[HEADER_PIPE_SIZE] = '\0';
+			
+			printf("Pipe : %s\n", headerPipeStr);
+			headerPipe[i] = getHeaderPipe(headerPipeStr);
+			printf("Header size : %d, rep : %d, pl : %d\n", headerPipe[i].size, headerPipe[i].waitRep, headerPipe[i].numPlayer);
+			
+			if(headerPipe[i].size != 0){
+				msgToSend = malloc(headerPipe[i].size + 1);
+				read(game->pipeRW[0], msgToSend, headerPipe[i].size);
+				msgToSend[headerPipe[i].size] = '\0';
+				printf("Message pipe : %s\n", msgToSend);
+				header.size = ((msgToSend == NULL)? (-1) : (signed int)strlen(msgToSend));
+				header.id = game->player[headerPipe[i].numPlayer].id;
+				sendHeader(game->player[headerPipe[i].numPlayer].sock, header);
+				if(msgToSend != NULL){
+					sendMessage(game->player[headerPipe[i].numPlayer].sock, msgToSend);
+					free(msgToSend);
+					msgToSend = NULL;
+				}
+			}
+		}
+		
+		////////////////////////////////////////////////////////////////////////
+		////						RECEPTION CLIENTS						////
+		////////////////////////////////////////////////////////////////////////
+		
+		for(i=0; i < game->nbPlayer; i++){
+			// Si on attend un réponse ce client (client i)
+			if(headerPipe[i].waitRep == 1){
+				SOCKET sockCli = game->player[headerPipe[i].numPlayer].sock;
+				if(recvHeader(sockCli, &header) == -1){
+					perror("Erreur dans la réception de l'entete d'un client");
+					exit(EXIT_FAILURE);
+				}
+				
+				if(header.size != -1){ // Si -1, aucun msg à recevoir
+					message = malloc(header.size);
+					int res = recv(sockCli, message, header.size, 0);
+					message[header.size-1] = '\0'; // Met le caractère '\0' en fin de chaine
+					if(res != header.size-1){
+						perror("Erreur de reception");
+						exit(EXIT_FAILURE);
+					}
+					
+					if(res == -1){
+						perror("Error recv");
+						exit(EXIT_FAILURE);
+					}
+					//respCli = getRespCli(message); // Récupère les réponses client
+					printf("Message recus : %s\n", message);
+					free(message);
+				}
+			}
+		}
 		
 		//~ printf("THREAD !! et sock Client 1 : %d\n", game->player[0].sock);
 		//~ outc(&msgToSend, "%s", "1 : La partie peut commencer...\n");
-		//~ header.size = ((msgToSend == NULL)? (-1) : (signed int)strlen(msgToSend));
-		//~ sendHeader(game->player[0].sock, header);
-		//~ if(msgToSend != NULL){
-			//~ header.size = strlen(msgToSend)+1;
-			//~ sendMessage(game->player[0].sock, msgToSend);
-			//~ free(msgToSend);
-			//~ msgToSend = NULL;
-		//~ }
+
 		//~ 
 		//~ outc(&msgToSend, "%s", " 2 : La partie peut commencer...\n");
 		//~ header.size = ((msgToSend == NULL)? (-1) : (signed int)strlen(msgToSend));

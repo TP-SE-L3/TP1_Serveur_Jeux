@@ -18,50 +18,49 @@ void connectedMode(SOCKET sock){
 	command_t command = {NULL, NULL};
 	
 	
-	
-	if(recvHeader(sock, &header) == -1){
-		perror("Erreur dans la réception de l'entete");
-		exit(EXIT_FAILURE);
-	}
-	printf("Header !!!");
-	
-	// Quand le serveur a envoyé un messsage
-	if(header.size != -1){
-		message = NULL;
-		message = recvMessage(sock, header); // Reception du message
-		if(message == NULL){
-			perror("Erreur dans la reception du message.");
+	while(1){
+		if(recvHeader(sock, &header) == -1){
+			perror("Erreur dans la réception de l'entete");
 			exit(EXIT_FAILURE);
 		}
 		
-		
-		startMsg = message;
-		do{ // Récupère et interprète toutes les commandes
-			command = getCommand(&message);
-			listResp = performCommandCli(&command, listResp);
-			command.args = cleanL(command.args, 0); // Vide la liste d'arguments s'il en reste
-		}while(command.name != NULL);
-		fflush(stdout);
-		
-		responseForServ = formatResponse(&listResp);
-		free(startMsg);
+		// Quand le serveur a envoyé un messsage
+		if(header.size != -1){
+			message = NULL;
+			message = recvMessage(sock, header); // Reception du message
+			if(message == NULL){
+				perror("Erreur dans la reception du message.");
+				exit(EXIT_FAILURE);
+			}
+			
+			
+			startMsg = message;
+			do{ // Récupère et interprète toutes les commandes
+				command = getCommand(&message);
+				listResp = performCommandCli(&command, listResp);
+				command.args = cleanL(command.args, 0); // Vide la liste d'arguments s'il en reste
+			}while(command.name != NULL);
+			fflush(stdout);
+			
+			responseForServ = formatResponse(&listResp);
+			free(startMsg);
+			
+			////////////////////////////////////////////////////////////////////////
+			////							REPONSE								////
+			////////////////////////////////////////////////////////////////////////
+			if(responseForServ != NULL){
+				header.size = strlen(responseForServ)+1;
+				if(sendHeader(sock, header) == -1){
+					perror("Erreur dans l'envoi de l'entete au serveur");
+					exit(EXIT_FAILURE);
+				}
+				sendMessage(sock, responseForServ);
+				free(responseForServ);
+				responseForServ = NULL;
+			}
+		}
 	}
-	
-	sleep(5);
-		//~ 
-		//~ 
-		//~ ////////////////////////////////////////////////////////////////////////
-		//~ ////							REPONSE								////
-		//~ ////////////////////////////////////////////////////////////////////////
-		//~ if(responseForServ != NULL){
-			//~ header.size = strlen(responseForServ)+1;
-			//~ if(sendHeader(sock, header) == -1){
-				//~ perror("Erreur dans l'envoi de l'entete au serveur");
-				//~ exit(EXIT_FAILURE);
-			//~ }
-			//~ sendMessage(sock, responseForServ);
-			//~ free(responseForServ);
-		//~ }
+		
 		
 		
 }
