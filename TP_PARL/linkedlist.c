@@ -147,3 +147,28 @@ char* listToStringL(linkedlist_t list){
 	
 	return strRet;
 }
+
+
+void** findL(linkedlist_t list, int num){
+	element* tmp;
+	pair_t pair;
+	for(tmp = list; tmp != NULL; tmp = tmp->next){
+		if(tmp->type == PAIR){
+			pair = *(pair_t*)tmp->val;
+			if(pair.num == num){
+				return pair.val;
+			}
+		}
+	}
+	return NULL;
+}
+
+
+linkedlist_t addPairL(linkedlist_t list, void* val, int num){
+	pair_t* pair = malloc(sizeof(pair_t));
+	pair->num = num;
+	pair->val = val;
+	return addQueueL(list, pair, PAIR);
+}
+
+

@@ -17,31 +17,24 @@
 #include "../parser.h"
 
 
+// Il serait mieux de faire une map
+linkedlist_t listTypeGames;
+
+
 char* gameManager(int* idGame, player_t client, linkedlist_t args, linkedlist_t* listGames, int* currentIndex){
 	char* commands = NULL;
 	int choix = 0;
+	
 	
 	if(*idGame == -1){
 		if(!isEmptyL(args)){
 			element* el = popL(&args);
 			choix = (int)el->val;
-			switch(choix){
-				case GAME_PENDU:
-					outc(&commands, "%s", "Pendu\n");
-				break;
-				case GAME_MORPION:
-					outc(&commands, "%s", "Morpion\n");
-				break;
-				case CHOICE_EXIT:
-					outc(&commands, "%s", "Quitter\n");
-				break;
-				default: 
-					outc(&commands, "%s", "Choix incorrect...\n\n"); 
-					waitc(&commands, 1);
-					choix = 0; 
-				break;
-			}
-			if(choix != 0 && choix != CHOICE_EXIT){
+			
+			////////////////////////////////////////////////////////////////////////
+			////						CHOIX D'UN JEU							////
+			////////////////////////////////////////////////////////////////////////
+			if(choix <= sizeL(listTypeGames) && choix > 0){ // Si le choix est correct
 				element* el;
 				for(el = *listGames; el != NULL; el = el->next){
 					game_t* curGame = (game_t*)el->val;
@@ -86,16 +79,35 @@ char* gameManager(int* idGame, player_t client, linkedlist_t args, linkedlist_t*
 					//waitc(&commands, 5);
 				}
 			}
+			
+			////////////////////////////////////////////////////////////////////////
+			////							QUITTER								////
+			////////////////////////////////////////////////////////////////////////
+			else if(choix == sizeL(listTypeGames)+1){
+				outc(&commands, "%s", "Aurevoir...\n");
+				quitc(&commands);
+			}
+			else{
+				outc(&commands, "%s", "Choix incorrect...\n\n"); 
+				waitc(&commands, 1);
+				choix = 0; 
+			}
 		}
 		////////////////////////////////////////////////////////////////////////
 		////							MENU								////
 		////////////////////////////////////////////////////////////////////////
 		if(choix == 0){
+			
 			systemc(&commands, "clear");
 			outc(&commands, "%s", "=================== MENU ===================\n");
-			outc(&commands, "%d %s", GAME_PENDU, ". Pendu\n");
-			outc(&commands, "%d %s", GAME_MORPION, ". Morpion\n");
-			outc(&commands, "%d %s", CHOICE_EXIT, ". Quitter\n");
+			// Affiche la liste des jeux possibles
+			element* elem;
+			typeGame_t curTypeG;
+			for(elem = listTypeGames; elem != NULL; elem = elem->next){
+				curTypeG = *(typeGame_t*)(*(pair_t*)elem->val).val; // Récupère le typeGame dans la paire
+				outc(&commands, "%d %s %s %s", curTypeG.id, ". ", curTypeG.name, "\n");
+			}
+			outc(&commands, "%d %s", sizeL(listTypeGames)+1, ". Quitter\n"); // Quitter est le dernier le nombre de jeux+1
 			inc(&commands, "%d");
 		}
 	}
@@ -132,6 +144,23 @@ char* gameManager(int* idGame, player_t client, linkedlist_t args, linkedlist_t*
 	listCommand = cleanL(listCommand, 1); // Vide la liste*/
 	
 	return commands;
+}
+
+
+
+void initListTypeGames(){
+	typeGame_t* nwtypeG1 = malloc(sizeof(typeGame_t));
+	typeGame_t* nwtypeG2 = malloc(sizeof(typeGame_t));
+	nwtypeG1->id = 1;
+	strcpy(nwtypeG1->name, "Pendu");
+	strcpy(nwtypeG1->path, "Games/Pendu/Pendu");
+	nwtypeG1->nbJoueur = 2;
+	listTypeGames = addPairL(listTypeGames, nwtypeG1, nwtypeG1->id);
+	nwtypeG2->id = 2;
+	strcpy(nwtypeG2->name, "Morpion");
+	strcpy(nwtypeG2->path, "Games/Morpion/Morpion");
+	nwtypeG2->nbJoueur = 2;
+	listTypeGames = addPairL(listTypeGames, nwtypeG2, nwtypeG2->id);
 }
 
 
@@ -173,13 +202,23 @@ linkedlist_t getRespCli(char* resp){
 void* playGame(void* arg){
 	char* message = NULL;
 	header_t header = {-1, -1, -1};
-	//~ linkedlist_t respCli = NULL;
 	game_t* game = (game_t*)arg;
 	headerPipe_t headerPipe[2]; // ----- Demander d'où vient le prblème si headerPipe n'est pas initilisé avant le fork
 	pid_t pid;
+	// On récupère les informations sur le jeu
+	typeGame_t gameType = *(typeGame_t*)findL(listTypeGames, game->idTypeGame);
+	int quit = 0; // Est mit à 1 quand on doit quitter la partie
 	
-	if(pipe(game->pipeRW) == -1){
+	
+	printf(" [ID:%d | Socket:%d | Partie:%d -> %s]\n", game->player[0].id, game->player[0].sock, game->id, gameType.name);
+	printf(" [ID:%d | Socket:%d | Partie:%d -> %s]\n", game->player[1].id, game->player[1].sock, game->id, gameType.name);
+	
+	if(pipe(game->pipeR) == -1){
 		perror("Erreur tube RW");
+		exit(EXIT_FAILURE);
+	}
+	if(pipe(game->pipeW) == -1){
+		perror("Erreur tube WR");
 		exit(EXIT_FAILURE);
 	}
 	
@@ -189,146 +228,99 @@ void* playGame(void* arg){
 		exit(EXIT_FAILURE);
 	}
 	if(pid == 0){ // On est dans le fils
-		close(game->pipeRW[0]); // Ferme la lecture
-		char strPipeRW[10];
-		sprintf(strPipeRW, "%d", game->pipeRW[1]);
-		char* argList[] = {strPipeRW};
-		printf("Pipe : %d\n", game->pipeRW[1]);
+		close(game->pipeR[0]); // Ferme la lecture
+		close(game->pipeW[1]);
+		char strpipeR[10];
+		sprintf(strpipeR, "%d", game->pipeR[1]);
+		char* argList[] = {strpipeR};
+		dup2(game->pipeW[0], STDIN_FILENO); // pipeW remplace le fichier d'entrée stdin
+		close(game->pipeW[0]);
 		
-		execvp("Games/Pendu", argList);
+		execvp(gameType.path, argList);
 		printf("Erreur impossible de lancer le jeu.\n");
 		exit(EXIT_FAILURE);
 	}
 	else{
-		close(game->pipeRW[1]); // Ferme l'écriture
+		close(game->pipeR[1]); // Ferme l'écriture
+		close(game->pipeW[0]); // Ferme la lecture
 		char headerPipeStr[HEADER_PIPE_SIZE+1];
 		char* msgToSend = NULL; // Récupère les commandes clients dans le pipe
 		int i;
 		
 		header.idGame = game->id;
-		
-		
-		////////////////////////////////////////////////////////////////////////
-		////							ENVOIES CLIENTS						////
-		////////////////////////////////////////////////////////////////////////
-		// i n'est pas forcément le numéro du joueur, le numéro du joueur est dans headerPipe
-		// On envoie toutes les commandes qu'il faut envoyer à chaque client
-		for(i = 0; i < game->nbPlayer; i++){ 
-			read(game->pipeRW[0], headerPipeStr, HEADER_PIPE_SIZE);
-			headerPipeStr[HEADER_PIPE_SIZE] = '\0';
-			
-			printf("Pipe : %s\n", headerPipeStr);
-			headerPipe[i] = getHeaderPipe(headerPipeStr);
-			printf("Header size : %d, rep : %d, pl : %d\n", headerPipe[i].size, headerPipe[i].waitRep, headerPipe[i].numPlayer);
-			
-			if(headerPipe[i].size != 0){
-				msgToSend = malloc(headerPipe[i].size + 1);
-				read(game->pipeRW[0], msgToSend, headerPipe[i].size);
-				msgToSend[headerPipe[i].size] = '\0';
-				printf("Message pipe : %s\n", msgToSend);
-				header.size = ((msgToSend == NULL)? (-1) : (signed int)strlen(msgToSend));
-				header.id = game->player[headerPipe[i].numPlayer].id;
-				sendHeader(game->player[headerPipe[i].numPlayer].sock, header);
-				if(msgToSend != NULL){
-					sendMessage(game->player[headerPipe[i].numPlayer].sock, msgToSend);
-					free(msgToSend);
-					msgToSend = NULL;
-				}
-			}
-		}
-		
-		////////////////////////////////////////////////////////////////////////
-		////						RECEPTION CLIENTS						////
-		////////////////////////////////////////////////////////////////////////
-		
-		for(i=0; i < game->nbPlayer; i++){
-			// Si on attend un réponse ce client (client i)
-			if(headerPipe[i].waitRep == 1){
-				SOCKET sockCli = game->player[headerPipe[i].numPlayer].sock;
-				if(recvHeader(sockCli, &header) == -1){
-					perror("Erreur dans la réception de l'entete d'un client");
-					exit(EXIT_FAILURE);
+		while(!quit){
+			////////////////////////////////////////////////////////////////////////
+			////							ENVOIES CLIENTS						////
+			////////////////////////////////////////////////////////////////////////
+			// i n'est pas forcément le numéro du joueur, le numéro du joueur est dans headerPipe
+			// On envoie toutes les commandes qu'il faut envoyer à chaque client
+			for(i = 0; i < game->nbPlayer; i++){
+				read(game->pipeR[0], headerPipeStr, HEADER_PIPE_SIZE);
+				headerPipeStr[HEADER_PIPE_SIZE] = '\0';
+				
+				//printf("Pipe : %s\n", headerPipeStr);
+				headerPipe[i] = getHeaderPipe(headerPipeStr);
+				if(headerPipe[i].size == -1){ // On quitter la partie ------------- 
+					quit = 1;
+					break;
 				}
 				
-				if(header.size != -1){ // Si -1, aucun msg à recevoir
-					message = malloc(header.size);
-					int res = recv(sockCli, message, header.size, 0);
-					message[header.size-1] = '\0'; // Met le caractère '\0' en fin de chaine
-					if(res != header.size-1){
-						perror("Erreur de reception");
+				if(headerPipe[i].size != 0){
+					msgToSend = malloc(headerPipe[i].size + 1);
+					read(game->pipeR[0], msgToSend, headerPipe[i].size);
+					msgToSend[headerPipe[i].size] = '\0';
+					header.size = ((msgToSend == NULL)? (-1) : (signed int)strlen(msgToSend));
+					header.id = game->player[headerPipe[i].numPlayer].id;
+					sendHeader(game->player[headerPipe[i].numPlayer].sock, header);
+					if(msgToSend != NULL){
+						sendMessage(game->player[headerPipe[i].numPlayer].sock, msgToSend);
+						free(msgToSend);
+						msgToSend = NULL;
+					}
+				}
+			}
+			
+			////////////////////////////////////////////////////////////////////////
+			////						RECEPTION CLIENTS						////
+			////////////////////////////////////////////////////////////////////////
+			
+			for(i=0; i < game->nbPlayer; i++){
+				// Si on attend un réponse ce client (client i)
+				if(headerPipe[i].waitRep == 1){
+					SOCKET sockCli = game->player[headerPipe[i].numPlayer].sock;
+					if(recvHeader(sockCli, &header) == -1){
+						perror("Erreur dans la réception de l'entete d'un client");
 						exit(EXIT_FAILURE);
 					}
 					
-					if(res == -1){
-						perror("Error recv");
-						exit(EXIT_FAILURE);
+					if(header.size != -1){ // Si -1, aucun msg à recevoir
+						message = malloc(header.size);
+						int res = recv(sockCli, message, header.size, 0);
+						message[header.size-1] = '\0'; // Met le caractère '\0' en fin de chaine
+						write(game->pipeW[1], message, strlen(message));
+						if(res != header.size-1){
+							perror("Erreur de reception");
+							exit(EXIT_FAILURE);
+						}
+						if(res == -1){
+							perror("Error recv");
+							exit(EXIT_FAILURE);
+						}
+						free(message);
 					}
-					//respCli = getRespCli(message); // Récupère les réponses client
-					printf("Message recus : %s\n", message);
-					free(message);
 				}
 			}
 		}
 		
-		//~ printf("THREAD !! et sock Client 1 : %d\n", game->player[0].sock);
-		//~ outc(&msgToSend, "%s", "1 : La partie peut commencer...\n");
-
-		//~ 
-		//~ outc(&msgToSend, "%s", " 2 : La partie peut commencer...\n");
-		//~ header.size = ((msgToSend == NULL)? (-1) : (signed int)strlen(msgToSend));
-		//~ sendHeader(game->player[1].sock, header);
-		//~ if(msgToSend != NULL){
-			//~ header.size = strlen(msgToSend)+1;
-			//~ sendMessage(game->player[1].sock, msgToSend);
-			//~ free(msgToSend);
-			//~ msgToSend = NULL;
-		//~ }
-		
-		/*if(recvHeader(sockCli, &header) == -1){
-			perror("Erreur dans la réception de l'entete d'un client");
-			exit(EXIT_FAILURE);
-		}
-		
-		if(header.size != -1){ // Si -1, aucun msg à recevoir
-			message = malloc(header.size);
-			int res = recv(sockCli, message, header.size, 0);
-			message[header.size-1] = '\0'; // Met le caractère '\0' en fin de chaine
-			if(res != header.size-1){
-				perror("Erreur de reception");
+		for(i=0; i < game->nbPlayer; i++){
+			if(shutdown(game->player[i].sock, SHUT_RDWR) == -1){
+				perror("Error to shutdown sockets");
 				exit(EXIT_FAILURE);
 			}
-			
-			if(res == -1){
-				perror("Error recv");
-				exit(EXIT_FAILURE);
-			}
-			respCli = getRespCli(message); // Récupère les réponses client
-			
-			free(message);
+			close(game->player[i].sock);
 		}
-		player_t playerCli = {header.id, sockCli}; // Informations sur le client
-		int idGameBefore = header.idGame;
-		msgToSend = gameManager(&header.idGame, playerCli, respCli, &listGames, &indiceListGame);
-		// Nouvelle partie, on est entré dans un thread ou on attend un autre joueur
-		if(idGameBefore != header.idGame && header.idGame >= 0){
-			closeSock = FALSE; // On ne ferme pas la socket
-		}
-		respCli = cleanL(respCli, 0);*/
-		
-		
-		
-		
-		//~ if(shutdown(game->player[0].sock, SHUT_RDWR) == -1){
-			//~ perror("Error to shutdown sockets");
-			//~ exit(EXIT_FAILURE);
-		//~ }
-		//~ close(game->player[0].sock);
-		//~ 
-		//~ if(shutdown(game->player[1].sock, SHUT_RDWR) == -1){
-			//~ perror("Error to shutdown sockets");
-			//~ exit(EXIT_FAILURE);
-		//~ }
-		//~ close(game->player[1].sock);
+		close(game->pipeR[0]); // Fermer pipe lecture
+		close(game->pipeW[1]); // Fermer pipe écriture
 	}
 	
 	return arg;

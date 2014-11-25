@@ -188,6 +188,6 @@ headerPipe_t getHeaderPipe(char* message){
 		strCurrent = substrpbrk(sizeStr, " \0");
 		header.size = atoi(sizeStr);
 	}
-	//free(startStrCurrent);
+	free(startStrCurrent);
 	return header;
 }

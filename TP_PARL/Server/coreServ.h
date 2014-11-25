@@ -17,15 +17,18 @@ struct game_t{
 	int idTypeGame;
 	int nbPlayer;
 	player_t player[2]; // La liste des joueurs
-	int pipeWR[2];
-	int pipeRW[2];
+	int pipeW[2];
+	int pipeR[2];
 };
 
+typedef struct typeGame_t typeGame_t;
+struct typeGame_t{
+	int id;
+	char name[25];
+	char path[100]; // Le chemin de du programme du jeu
+	int nbJoueur; // Pour le moment seulement 2 est possible
+};
 
-
-#define GAME_PENDU 1
-#define GAME_MORPION 2
-#define CHOICE_EXIT 3
 
 /* Permet de gérer les jeux en fonctions des demandes client
  * Retourne les commandes à envoyer au client sous forme d'une chaine de caractère
@@ -34,6 +37,9 @@ struct game_t{
  * @param args: les paramètre envoyés par le client (Réponses du client)
  * */
 char* gameManager(int* idGame, player_t client, linkedlist_t args, linkedlist_t* listGames, int *currentIndex);
+
+// Permet d'initialiser la liste des types de jeu
+void initListTypeGames();
 
 /* Converti un chaine en liste d'arguments
  * Retourne une liste d'éléments récupérer dans la réponse client(char*)

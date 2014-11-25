@@ -5,6 +5,7 @@ typedef enum Type_e{
 	INT,
 	FLOAT,
 	STRING,
+	PAIR, // Pour se servir de la liste comme une map
 	OTHER // N'importe quel type : il faut que le programmeur sache ce qu'il y a dedans
 } Type_e;
 
@@ -15,6 +16,12 @@ struct element{
 	void** val; // Double, car il faut pouvoir changer l'adresse du pointer (pour les float, double...)
 	Type_e type;
 	element* next;
+};
+
+typedef struct pair_t pair_t;
+struct pair_t{
+	void** val;
+	int num;
 };
 
 typedef element* linkedlist_t;
@@ -75,4 +82,11 @@ int nbOccTypeL(linkedlist_t list, Type_e type);
 /* Retourne la liste des éléments sous forme d'une chaine de caractères
  * @param list: La liste à transformer en chaine*/
 char* listToStringL(linkedlist_t list);
+
+// Cherche un élément dans la liste (seulement si elle est compossée de pair)
+void** findL(linkedlist_t list, int num);
+// Permet de faire une map ( NON ordonnée, avec doublons possibles)
+linkedlist_t addPairL(linkedlist_t list, void* val, int num);
+
+
 #endif

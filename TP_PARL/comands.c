@@ -125,6 +125,25 @@ void systemc(char** listCommand, char* commandSys){
 }
 
 
+void quitc(char** listCommand){
+	char* nwListCommand = NULL;
+	int sizeListCmd = (*listCommand == NULL)? 0 : strlen(*listCommand);
+	char command[14] = "cmd:quit [];\n";
+	
+	nwListCommand = malloc(strlen(command) + sizeListCmd + 1);
+	
+	if(*listCommand != NULL){
+		strcpy(nwListCommand, *listCommand);
+		free(*listCommand);
+	}
+	else{
+		*nwListCommand = '\0';
+	}
+	
+	strcat(nwListCommand, command);
+	*listCommand = nwListCommand;
+}
+
 
 //~ void outc2(linkedlist_t *listCommand, char* format, ...){
 	//~ int i, j;

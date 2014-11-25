@@ -34,8 +34,9 @@ int main(){
 	command_t command = {NULL, NULL};
 	
 	int idGameBefore;
+	int quit = 0; // On quitte quand il est à 1
 	
-	while(1){
+	while(!quit){
 		sock = connectCli("127.0.0.1");
 		
 		
@@ -85,15 +86,19 @@ int main(){
 			startMsg = message;
 			do{ // Récupère et interprète toutes les commandes
 				command = getCommand(&message);
+				if(command.name != NULL && strcmp(command.name, "quit") == 0){
+					quit = 1;
+				}
 				listResp = performCommandCli(&command, listResp);
 				command.args = cleanL(command.args, 0); // Vide la liste d'arguments s'il en reste
+				
 			}while(command.name != NULL);
 			fflush(stdout);
 			
 			responseForServ = formatResponse(&listResp);
 			free(startMsg);
 			if(responseForServ == NULL){
-				sleep(1); // Quand on a pas de réponse, on attend 1 secondes
+				sleep(1); // Quand on a pas de réponse, on attend 1 seconde
 			}
 		}
 		

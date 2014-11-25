@@ -16,9 +16,9 @@ void connectedMode(SOCKET sock){
 	
 	linkedlist_t listResp = NULL; // La liste des réponses de commande 
 	command_t command = {NULL, NULL};
+	int quit = 0; // Mit à 1 quand on doit quitter la partie
 	
-	
-	while(1){
+	while(!quit){
 		if(recvHeader(sock, &header) == -1){
 			perror("Erreur dans la réception de l'entete");
 			exit(EXIT_FAILURE);
@@ -37,6 +37,9 @@ void connectedMode(SOCKET sock){
 			startMsg = message;
 			do{ // Récupère et interprète toutes les commandes
 				command = getCommand(&message);
+				if(command.name != NULL && strcmp(command.name, "quit") == 0){
+					quit = 1;
+				}
 				listResp = performCommandCli(&command, listResp);
 				command.args = cleanL(command.args, 0); // Vide la liste d'arguments s'il en reste
 			}while(command.name != NULL);
@@ -51,7 +54,7 @@ void connectedMode(SOCKET sock){
 			if(responseForServ != NULL){
 				header.size = strlen(responseForServ)+1;
 				if(sendHeader(sock, header) == -1){
-					perror("Erreur dans l'envoi de l'entete au serveur");
+					perror("Erreur dans l'enqvoi de l'entete au serveur");
 					exit(EXIT_FAILURE);
 				}
 				sendMessage(sock, responseForServ);

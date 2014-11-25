@@ -1,16 +1,16 @@
 CC = gcc
 CFLAGS = -W -Wall
-EXEC = Pendu
-SRC = $(wildcard *.c ../../*.c)
-INCLUDES = $(wildcard *.h ../../*.h)
+EXEC = Morpion
+SRC = $(wildcard *.c ../../../*.c)
+INCLUDES = $(wildcard *.h ../../../*.h)
 OBJ = $(SRC:.c=.o)
 
 all: $(EXEC)
 
-$(EXEC): main.o $(OBJ)
+$(EXEC): morpion.o $(OBJ)
 	$(CC) $(CFLAGS) -o $(EXEC) $(OBJ) $(INCLUDES)
 
-main.o: main.c
+main.o: morpion.c
 	$(CC) $(CFLAGS) -c $^
 
 

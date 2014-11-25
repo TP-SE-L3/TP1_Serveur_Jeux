@@ -14,6 +14,8 @@ void inc(char** listCommand, char* format);
  * @param commandSys : Chaine contenant la command système*/
 void systemc(char** listCommand, char* commandSys);
 
+/* Peremet faire quitter le client ou de lui faire faire un retour en arrière */
+void quitc(char** listCommand);
 
 /* Permet de rajouter une commande out à la liste des commandes
  * @param listCommand: la liste des commande (liste de chaines)
