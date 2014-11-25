@@ -25,7 +25,7 @@ void flushc(int fd, char* tabPl[], int nbPlayers);
 void* getResp(linkedlist_t* listResp, Type_e type);
 linkedlist_t respToList(char* resp);
 void reversePlayer(int* j1, int* j2);
-int nextPlyer(int J);
+int nextPlayer(int J);
 void quit(int fd); // Signale au serveur que l'on quitte
 
 #endif

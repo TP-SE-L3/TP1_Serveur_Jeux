@@ -38,6 +38,14 @@ int main(){
 		linkedlist_t listGames = NULL;
 		int indiceListGame = 0;
 		int closeSock = TRUE; // Boolean, si vrai on ferme le socket actuel, sinon on ne le ferme pas (il est dans un thread)
+		FILE* fileGames;
+		
+		
+		fileGames = fopen("data/games", "r"); // Fichier conteant la liste des jeux
+		if (fileGames == NULL){
+			perror("Impossible d'ouvrir la liste des jeux.");
+			exit(EXIT_FAILURE);
+		}
 		
 		
 		
@@ -68,7 +76,9 @@ int main(){
 			perror("Error Listen");
 			exit(EXIT_FAILURE);
 		}
-		initListTypeGames(); // Initialise la liste des jeux
+		
+		
+		initListTypeGames(fileGames); // Initialise la liste des jeux
 		
 		
 		printf(" Le serveur est en marche.\n\n");

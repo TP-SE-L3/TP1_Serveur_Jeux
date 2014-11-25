@@ -39,7 +39,10 @@ struct typeGame_t{
 char* gameManager(int* idGame, player_t client, linkedlist_t args, linkedlist_t* listGames, int *currentIndex);
 
 // Permet d'initialiser la liste des types de jeu
-void initListTypeGames();
+void initListTypeGames(FILE* file);
+
+// Permet de récupérer des infos sur un type de jeux
+void getGameType(char* string, typeGame_t* gameType);
 
 /* Converti un chaine en liste d'arguments
  * Retourne une liste d'éléments récupérer dans la réponse client(char*)
@@ -50,4 +53,6 @@ linkedlist_t getRespCli(char* resp);
  * @param arg: Doit contenir les informations sur la partie sous forme d'une structure game_t
  * */
 void* playGame(void* arg);
+
+
 #endif

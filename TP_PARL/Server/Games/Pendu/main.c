@@ -104,7 +104,7 @@ int main(int argc, char** argv){
 	}
 	
 	//printf("Pendu : Le joueur %d a gagne.\n", jGagne+1);
-	jPerdu = nextPlyer(jGagne);
+	jPerdu = nextPlayer(jGagne);
 	systemc(&outPl[J1], "clear");
 	systemc(&outPl[J2], "clear");
 	outc(&outPl[jGagne], "%s", "======= Jeu du pendu =======\n\n");
@@ -131,6 +131,8 @@ int main(int argc, char** argv){
 	close_out_players(outPl, NB_PLAYER);
 	return EXIT_SUCCESS;
 }
+
+
 
 char* initHiddenWord(char* word){
 	int i;

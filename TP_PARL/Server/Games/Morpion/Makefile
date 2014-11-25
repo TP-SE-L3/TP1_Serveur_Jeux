@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -W -Wall
 EXEC = Morpion
-SRC = $(wildcard *.c ../../../*.c)
-INCLUDES = $(wildcard *.h ../../../*.h)
+SRC = $(wildcard *.c ../*.c ../../../*.c)
+INCLUDES = $(wildcard *.h ../*.h ../../../*.h)
 OBJ = $(SRC:.c=.o)
 
 all: $(EXEC)

@@ -19,10 +19,10 @@ void outc(char** listCommand, char* format, ...){
 	va_start(listArgs, format);
 	strcpy(nwFormat, "cmd:out [");
 	for(i=0, j=strlen(nwFormat); format[i] != '\0'; i++){ // Rajoute les "" pour les chaines
-		if(*(format+i) == '%' && *(format+i+1) == 's'){
+		if(*(format+i) == '%' && (*(format+i+1) == 's' || *(format+i+1) == 'c')){
 			nwFormat[j++] = '"';
 			nwFormat[j++] = '%';
-			nwFormat[j++] = 's';
+			nwFormat[j++] = *(format+i+1);
 			nwFormat[j++] = '"';
 			i++;
 		}

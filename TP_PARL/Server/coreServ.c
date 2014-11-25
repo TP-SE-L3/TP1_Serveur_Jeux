@@ -84,7 +84,7 @@ char* gameManager(int* idGame, player_t client, linkedlist_t args, linkedlist_t*
 			////							QUITTER								////
 			////////////////////////////////////////////////////////////////////////
 			else if(choix == sizeL(listTypeGames)+1){
-				outc(&commands, "%s", "Aurevoir...\n");
+				outc(&commands, "%s", "Au revoir...\n");
 				quitc(&commands);
 			}
 			else{
@@ -148,20 +148,77 @@ char* gameManager(int* idGame, player_t client, linkedlist_t args, linkedlist_t*
 
 
 
-void initListTypeGames(){
-	typeGame_t* nwtypeG1 = malloc(sizeof(typeGame_t));
+void initListTypeGames(FILE* file){
+	typeGame_t* nwtypeG = NULL;
+	char * line = NULL;
+	size_t len = 0;
+	ssize_t read;
+	while ((read = getline(&line, &len, file)) != -1) {
+		nwtypeG = malloc(sizeof(typeGame_t));
+		printf("%s", line);
+		getGameType(line, nwtypeG);
+		listTypeGames = addPairL(listTypeGames, nwtypeG, nwtypeG->id);
+	}
+	
+	
+	/*typeGame_t* nwtypeG1 = malloc(sizeof(typeGame_t));
 	typeGame_t* nwtypeG2 = malloc(sizeof(typeGame_t));
 	nwtypeG1->id = 1;
 	strcpy(nwtypeG1->name, "Pendu");
 	strcpy(nwtypeG1->path, "Games/Pendu/Pendu");
 	nwtypeG1->nbJoueur = 2;
-	listTypeGames = addPairL(listTypeGames, nwtypeG1, nwtypeG1->id);
+	
 	nwtypeG2->id = 2;
 	strcpy(nwtypeG2->name, "Morpion");
 	strcpy(nwtypeG2->path, "Games/Morpion/Morpion");
 	nwtypeG2->nbJoueur = 2;
-	listTypeGames = addPairL(listTypeGames, nwtypeG2, nwtypeG2->id);
+	listTypeGames = addPairL(listTypeGames, nwtypeG2, nwtypeG2->id);*/
 }
+
+
+void getGameType(char* string, typeGame_t* gameType){
+	char* strCurrent; // Chaine qui va être modifée, petit à petit pour récupérer les bon éléments
+	char* startStrCurrent; // Le pointeur de départ de strCurrent, pour libérer la mémoire à la fin
+	char* idStr;
+	char* resStr; // Tmp variable de résultat
+	
+	
+	// Revoir le nom des variables
+	// Les paramètres doivent être dans le bon ordre
+	strCurrent = strbtw(string, '[', ']');
+	startStrCurrent = strCurrent;
+	resStr = strstr(strCurrent, "ID:"); // Récupère l'id du joueur
+	if(resStr != NULL){
+		strCurrent = resStr;
+		idStr = strCurrent+strlen("ID:");
+		strCurrent = substrpbrk(idStr, " \0");
+		gameType->id = atoi(idStr);
+	}
+	resStr = strstr(strCurrent, "NAME:"); 
+	if(resStr != NULL){
+		strCurrent = resStr;
+		idStr = strCurrent+strlen("NAME:");
+		strCurrent = substrpbrk(idStr, " \0");
+		strcpy(gameType->name, idStr);
+	}
+	resStr = strstr(strCurrent, "PATH:"); 
+	if(resStr != NULL){
+		strCurrent = resStr;
+		idStr = strCurrent+strlen("PATH:");
+		strCurrent = substrpbrk(idStr, " \0");
+		strcpy(gameType->path, idStr);
+	}
+	resStr = strstr(strCurrent, "NB_PL:"); // Récupère l'id du joueur
+	if(resStr != NULL){
+		strCurrent = resStr;
+		idStr = strCurrent+strlen("NB_PL:");
+		strCurrent = substrpbrk(idStr, " \0");
+		gameType->nbJoueur = atoi(idStr);
+	}
+	free(startStrCurrent);
+}
+
+
 
 
 linkedlist_t getRespCli(char* resp){

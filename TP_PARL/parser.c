@@ -7,7 +7,6 @@
 #include "linkedlist.h"
 
 
-
 command_t getCommand(char** str){
 	char* resStr;
 	char* arg = NULL;
@@ -191,3 +190,4 @@ headerPipe_t getHeaderPipe(char* message){
 	free(startStrCurrent);
 	return header;
 }
+
